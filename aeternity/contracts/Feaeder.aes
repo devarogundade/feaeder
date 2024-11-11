@@ -1,0 +1,15 @@
+@compiler >= 6
+
+contract Feaeder =
+  record state = {
+    value: int
+    }
+
+  stateful entrypoint init() = { value = 0 }
+
+  stateful entrypoint set( new_value: int
+                         ) =
+    put(state { value = new_value })
+
+  entrypoint get(): int = state.value
+

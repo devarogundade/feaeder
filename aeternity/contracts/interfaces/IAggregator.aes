@@ -1,0 +1,27 @@
+contract interface IAggregator =
+
+    record metadata = {
+        decimals: int,
+        description: option(string),
+        version: int
+        }
+
+    record datafeed = {
+        round_id: int,
+        answer: int,
+        timestamp: int
+        }
+
+    payable stateful entrypoint create_query : (string, int, int) => oracle_query(string, string)
+    
+    entrypoint get_oracle_question: (oracle_query(string, string)) => string
+    
+    entrypoint get_oracle_answer : (oracle_query(string, string)) => option(string)
+
+    entrypoint get_query_address : (int) => oracle_query(string, string)
+
+    entrypoint get_metadata : () => metadata 
+
+    entrypoint get_round_data : (int) => datafeed
+
+    entrypoint latest_round_data : () => datafeed

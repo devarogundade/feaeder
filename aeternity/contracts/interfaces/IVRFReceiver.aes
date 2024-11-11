@@ -1,0 +1,5 @@
+contract interface IVRFReceiver =
+
+    stateful entrypoint fulfill_random_number: ( request_id: int,
+                                                 random_number: int
+                                               ) => unit

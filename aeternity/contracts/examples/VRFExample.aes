@@ -1,0 +1,46 @@
+@compiler >= 6
+
+include "../interfaces/IVRF.aes"
+include "../interfaces/IVRFReceiver.aes"
+
+contract VRFExample : IVRFReceiver =
+    // ============== STATE/STORAGE ============== //
+    
+    record state = {
+        random_winner_idx: int,
+        players: map(int, address),
+        valid_request_id: int,
+        vrf: IVRF
+    }
+
+    // ============== INIT FUNCTION ============== //
+
+    stateful entrypoint init( vrf: IVRF
+                            ) = { random_winner_idx = 0
+                                , players = {}
+                                , valid_request_id = 0
+                                , vrf = vrf
+                                }
+
+    payable stateful entrypoint pick_winner() =
+        let request_fees : int = vrf.get_request_fees()
+
+        let min = Some(1)
+        let max = Some(Map.size(state.players))
+
+        let request_id = state.vrf.request_random_number(min, max, { value = request_fees })
+
+        put(state{ valid_request_id = request_id })
+        
+
+    // ============== CALLBACK FUNCTION ============== //
+
+    stateful entrypoint fulfill_random_number: ( request_id: int,
+                                                 random_number: int
+                                               ) =
+        require(Call.caller == state.vrf.address, "INVALID_VRF")
+        require(state.valid_request_id == request_id, "INVALID_REQUEST_ID")
+
+        put(state{ random_winner_idx = random_number })
+        
+

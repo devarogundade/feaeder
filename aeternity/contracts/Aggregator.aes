@@ -1,0 +1,171 @@
+@compiler >= 6
+
+include "Option.aes"
+include "String.aes"
+include "List.aes"
+
+payable contract Aggregator =
+    // ============== STATE/STORAGE ============== //
+
+    record state = {
+        relayer: address,
+        metadata: metadata,
+        rounds: map(int, datafeed),
+        latest_round_id: int,
+        oracle: oracle(string, string),
+        queries: map(int, oracle_query(string, string)),
+        last_queries_idx: int
+        }
+
+    // ============== RECORDS/STRUCTS ============== //
+
+    record metadata = {
+        decimals: int,
+        description: option(string),
+        version: int
+        }
+
+    record datafeed = {
+        round_id: int,
+        answer: int,
+        timestamp: int
+        }
+
+    // ============== EVENTS ============== //
+
+    datatype event =
+        RoundDataAdded(int, int)
+        | RoundDataUpdated(int, int)
+        | RoundDataRemoved(int)
+
+    // ============== INIT FUNCTION ============== //
+
+    stateful entrypoint init( decimals: int,
+                              description: option(string),
+                              version: int
+                            ) = 
+                            let oracle : oracle(string, string) = register_oracle(10, 50000)
+                            
+                            { relayer = Call.caller
+                                , metadata = {
+                                    decimals = decimals,
+                                    description = description,
+                                    version = version
+                                }
+                                , rounds = {}
+                                , latest_round_id = 0,
+                                oracle = oracle,
+                                queries = {},
+                                last_queries_idx = 0
+                                }
+
+    // ============== MUTATIVE FUNCTIONS ============== //
+
+    payable stateful entrypoint create_query( question : string,     				
+                                              qttl : int,
+                                              rttl : int) : oracle_query(string, string) =
+        let query_fee = Call.value
+        let query : oracle_query(string, string) = Oracle.query(state.oracle, question, query_fee, RelativeTTL(qttl), RelativeTTL(rttl))
+
+        put(state{ last_queries_idx = state.last_queries_idx + 1 })
+        put(state{ queries[state.last_queries_idx] = query })
+
+        query
+
+    stateful entrypoint add_round_data( answers: list(int),
+                                        timestamp: int
+                                       ) =
+        require_relayer()
+
+        let round_id : int = state.latest_round_id + 1
+        let answer : int = get_avg_from_data_set(answers)
+
+        put(state{ rounds[round_id] = {
+                    round_id = round_id,
+                    answer = answer,
+                    timestamp = timestamp
+                    }
+                })
+        put(state { latest_round_id = round_id })
+
+        Chain.event(RoundDataAdded(round_id, answer))
+
+    stateful entrypoint update_round_data( round_id: int,
+                                           answers: list(int),
+                                           timestamp: int
+                                         ) =
+        require_relayer()
+
+        require(Map.member(round_id, state.rounds), "INVALID_ROUND_ID")
+
+        let answer : int = get_avg_from_data_set(answers)
+
+        put(state{ rounds[round_id] = {
+                    round_id = round_id,
+                    answer = answer,
+                    timestamp = timestamp
+                    }
+                })
+
+        Chain.event(RoundDataUpdated(round_id, answer))
+
+    stateful entrypoint remove_round_data( round_id: int 
+                                         ) =
+        require_relayer()
+
+        put(state{ rounds = Map.delete(round_id, state.rounds)
+                })
+
+        Chain.event(RoundDataRemoved(round_id))
+
+    // ============== VIEW FUNCTIONS ============== //
+    
+    entrypoint get_oracle_question(query : oracle_query(string, string)) : string =
+        Oracle.get_question(state.oracle, query)  
+    
+    entrypoint get_oracle_answer(query : oracle_query(string, string)) : option(string) =
+        Oracle.get_answer(state.oracle, query)  
+
+    entrypoint get_query_address(last_queries_idx: int) : oracle_query(string, string) =
+        state.queries[last_queries_idx]
+
+    entrypoint get_round_data(round_id: int) : datafeed = state.rounds[round_id]
+
+    entrypoint latest_round_data() : datafeed = state.rounds[state.latest_round_id]
+
+    // ============== INTERNAL FUNCTIONS ============== //
+    
+    stateful function register_oracle( query_fee : int,
+                                       rttl : int
+                                     ) : oracle(string, string) =
+        Oracle.register(Contract.address, query_fee, RelativeTTL(rttl))
+
+    function get_avg_from_data_set(array: list(int)) : int =
+        let sum = List.sum(array)
+        let lenght = List.length(array)
+        sum / lenght
+
+    // ============== STATE VIEW FUNCTIONS ============== //
+
+    entrypoint get_metadata(): metadata = state.metadata 
+
+    entrypoint get_relayer(): address = state.relayer
+
+    entrypoint get_state(): state = state
+
+    // ============== CONTROLLED FUNCTIONS ============== //
+
+    stateful entrypoint respond( query : oracle_query(string, string),
+                                 answers : list(int)
+                               ) =
+        let answer : int = get_avg_from_data_set(answers)
+        Oracle.respond(state.oracle, query, Int.to_str(answer))
+
+    stateful entrypoint extend_oracle(rttl : int) : unit =
+        require_relayer()
+        Oracle.extend(state.oracle, RelativeTTL(rttl))
+
+    // ============== MODIFIERS ============== //
+
+    function require_relayer() =
+        require(Call.caller == state.relayer, "ONLY_RELAYER_ALLOWED")

@@ -1,0 +1,6 @@
+-sname coin_price_indexer
+
+-setcookie coin_price_indexer_cookie
+
++K true
++A30

@@ -1,0 +1,73 @@
+@compiler >= 6
+
+include "Option.aes"
+include "String.aes"
+
+include "./interfaces/IVRFReceiver.aes"
+
+contract VRF =
+    // ============== STATE/STORAGE ============== //
+
+    record state = {
+        relayer: address,
+        request_fees: int,
+        last_request_id: int
+        }
+
+    // ============== EVENTS ============== //
+
+    datatype event =
+        RandomNumberRequested(int, address, int)
+        | RandomNumberFulfilled(int)
+
+    // ============== INIT FUNCTION ============== //
+
+    stateful entrypoint init( request_fees: int
+                            ) = { relayer = Call.caller
+                                , request_fees = request_fees
+                                , last_request_id = 0
+                                }
+
+    // ============== MUTATIVE FUNCTIONS ============== //
+
+    payable stateful entrypoint request_random_number( max: int
+                                                     ) =
+        require(state.request_fees == Call.value, "INVALID_FEES")
+
+        let sender : address = Call.caller
+
+        let request_id = state.last_request_id + 1
+        
+        put(state { last_request_id = request_id })
+
+        Chain.spend(state.relayer, Call.value)
+        
+        Chain.event(RandomNumberRequested(request_id, sender, max))
+
+        request_id
+
+
+    stateful entrypoint fulfill_random_number( request_id: int,
+                                               receiver: IVRFReceiver,
+                                               random_number: int
+                                             ) =
+        require_relayer()
+
+        receiver.fulfill_random_number(request_id, random_number)
+
+        Chain.event(RandomNumberFulfilled(request_id))
+
+    // ============== STATE VIEW FUNCTIONS ============== //
+
+    entrypoint get_address(): address = Contract.address
+
+    // ============== STATE VIEW FUNCTIONS ============== //
+
+    entrypoint get_request_fees(): int = state.request_fees 
+
+    entrypoint get_state(): state = state
+
+    // ============== MODIFIERS ============== //
+
+    function require_relayer() =
+        require(Call.caller == state.relayer, "ONLY_RELAYER_ALLOWED")
