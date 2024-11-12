@@ -4,43 +4,57 @@ include "Option.aes"
 include "String.aes"
 include "List.aes"
 
+// @title Aggregator
+// @notice Aggregator Contract to manage and query oracle data feeds, ensuring data reliability with tolerance checking.
 payable contract Aggregator =
     // ============== STATE/STORAGE ============== //
 
+    // Defines the main contract state, including the relayer address, metadata, rounds of data feed, 
+    // the latest round ID, tolerance level for answer calculations, oracle, query mappings, and last query index.
     record state = {
-        relayer: address,
-        metadata: metadata,
-        rounds: map(int, datafeed),
-        latest_round_id: int,
-        tolerance: int,
-        oracle: oracle(string, string),
-        queries: map(int, oracle_query(string, string)),
-        last_queries_idx: int
+        relayer: address,               // Address allowed to interact as relayer
+        metadata: metadata,             // Oracle metadata (decimals, description, version)
+        rounds: map(int, datafeed),     // Mapping of round IDs to datafeeds
+        latest_round_id: int,           // ID of the most recent data round
+        tolerance: int,                 // Acceptable tolerance for data variations
+        oracle: oracle(string, string), // Registered oracle
+        queries: map(int, oracle_query(string, string)), // Stored oracle queries
+        last_queries_idx: int           // Counter for queries
         }
 
     // ============== RECORDS/STRUCTS ============== //
 
+    // Metadata record to store general information about the oracle.
     record metadata = {
-        decimals: int,
-        description: option(string),
-        version: int
+        decimals: int,              // Number of decimal places for precision
+        description: option(string),// Oracle description
+        version: int                // Oracle version
         }
 
+    // Datafeed record representing individual rounds of data.
     record datafeed = {
-        round_id: int,
-        answer: int,
-        timestamp: int
+        round_id: int,              // Round ID
+        answer: int,                // Computed answer for this round
+        timestamp: int              // Timestamp when this data was recorded
         }
 
     // ============== EVENTS ============== //
 
+    // Events to emit when data is added, updated, or removed in a round.
     datatype event =
-        RoundDataAdded(int, int)
-        | RoundDataUpdated(int, int)
-        | RoundDataRemoved(int)
+        RoundDataAdded(int, int)    // Fired when a round of data is added
+        | RoundDataUpdated(int, int)// Fired when a round of data is updated
+        | RoundDataRemoved(int)     // Fired when a round of data is removed
 
     // ============== INIT FUNCTION ============== //
 
+    /**
+     * Initializes the contract with oracle metadata and tolerance settings.
+     * @param decimals Number of decimal places for data precision.
+     * @param description Oracle description.
+     * @param version Oracle version.
+     * @param tolerance Tolerance level for validating data consistency.
+     */
     stateful entrypoint init( decimals: int,
                               description: option(string),
                               version: int,
@@ -64,6 +78,13 @@ payable contract Aggregator =
 
     // ============== MUTATIVE FUNCTIONS ============== //
 
+    /**
+     * Creates a new oracle query with specified time-to-live values for query and response.
+     * @param question The question for the oracle.
+     * @param qttl Time-to-live for the query in blocks.
+     * @param rttl Time-to-live for the response in blocks.
+     * @return The created oracle query.
+     */
     payable stateful entrypoint create_query( question : string,     				
                                               qttl : int,
                                               rttl : int) : oracle_query(string, string) =
@@ -75,6 +96,11 @@ payable contract Aggregator =
 
         query
 
+    /**
+     * Adds a new round of data, calculating the average if values are within tolerance.
+     * @param answers List of integer answers to consider.
+     * @param timestamp Timestamp of the data entry.
+     */
     stateful entrypoint add_round_data( answers: list(int),
                                         timestamp: int
                                        ) =
@@ -93,6 +119,12 @@ payable contract Aggregator =
 
         Chain.event(RoundDataAdded(round_id, Option.force(answer)))
 
+    /**
+     * Updates an existing round of data with a new answer and timestamp.
+     * @param round_id ID of the round to update.
+     * @param answers List of integer answers to consider.
+     * @param timestamp New timestamp of the data.
+     */
     stateful entrypoint update_round_data( round_id: int,
                                            answers: list(int),
                                            timestamp: int
@@ -112,6 +144,10 @@ payable contract Aggregator =
 
         Chain.event(RoundDataUpdated(round_id, Option.force(answer)))
 
+    /**
+     * Removes a round of data, deleting it from storage.
+     * @param round_id ID of the round to remove.
+     */
     stateful entrypoint remove_round_data( round_id: int 
                                          ) =
         require_relayer()
@@ -123,26 +159,61 @@ payable contract Aggregator =
 
     // ============== VIEW FUNCTIONS ============== //
     
+    /**
+     * Retrieves the question of a specified oracle query.
+     * @param query The oracle query.
+     * @return The question associated with the query.
+     */
     entrypoint get_oracle_question(query : oracle_query(string, string)) : string =
         Oracle.get_question(state.oracle, query)  
-    
+
+    /**
+     * Retrieves the answer of a specified oracle query, if available.
+     * @param query The oracle query.
+     * @return The answer associated with the query, if any.
+     */    
     entrypoint get_oracle_answer(query : oracle_query(string, string)) : option(string) =
         Oracle.get_answer(state.oracle, query)  
 
+    /**
+     * Retrieves a stored oracle query by index.
+     * @param last_queries_idx The index of the query to retrieve.
+     * @return The oracle query at the specified index.
+     */
     entrypoint get_query_address(last_queries_idx: int) : oracle_query(string, string) =
         state.queries[last_queries_idx]
 
+    /**
+     * Retrieves data for a specific round.
+     * @param round_id The ID of the round to retrieve.
+     * @return Datafeed associated with the round ID.
+     */
     entrypoint get_round_data(round_id: int) : datafeed = state.rounds[round_id]
 
+    /**
+     * Retrieves the latest round of data.
+     * @return The most recent datafeed entry.
+     */
     entrypoint latest_round_data() : datafeed = state.rounds[state.latest_round_id]
 
     // ============== INTERNAL FUNCTIONS ============== //
-    
+
+    /**
+     * Registers a new oracle with given query fee and relative time-to-live (TTL).
+     * @param query_fee The fee for each query.
+     * @param rttl Relative TTL for responses.
+     * @return A new oracle instance.
+     */    
     stateful private function register_oracle( query_fee : int,
                                        rttl : int
                                      ) : oracle(string, string) =
         Oracle.register(Contract.address, query_fee, RelativeTTL(rttl))
 
+    /**
+     * Calculates the average of answers if all values are within the tolerance range.
+     * @param array List of integer answers.
+     * @return The average of answers if within tolerance, else None.
+     */
     private function average_if_within_tolerance(array: list(int)) : option(int) =
         if (List.is_empty(array))
             None
@@ -172,20 +243,37 @@ payable contract Aggregator =
         else
             y
 
-
     // ============== STATE VIEW FUNCTIONS ============== //
 
+    /**
+     * Retrieves aggregator metadata.
+     * @return Aggregator metadata.
+     */
     entrypoint get_metadata(): metadata = state.metadata 
 
+    /**
+     * Retrieves the relayer address.
+     * @return The relayer address.
+     */
     entrypoint get_relayer(): address = state.relayer
 
+    /**
+     * Retrieves the entire contract state.
+     * @return Full contract state.
+     */
     entrypoint get_state(): state = state
 
     // ============== CONTROLLED FUNCTIONS ============== //
 
+    /**
+     * Responds to an oracle query with an answer if within tolerance.
+     * @param query The oracle query.
+     * @param answers List of answers to process.
+     */
     stateful entrypoint respond( query : oracle_query(string, string),
                                  answers : list(int)
                                ) =
+        require_relayer()
         let answer : option(int) = average_if_within_tolerance(answers)
         Oracle.respond(state.oracle, query, Int.to_str(Option.force(answer)))
 
@@ -195,5 +283,8 @@ payable contract Aggregator =
 
     // ============== MODIFIERS ============== //
 
+    /**
+     * Ensures only the designated relayer can execute certain functions.
+     */
     function require_relayer() =
         require(Call.caller == state.relayer, "ONLY_RELAYER_ALLOWED")

@@ -1,27 +1,64 @@
+// @title IAggregator
 contract interface IAggregator =
-
+    // Metadata record to store general information about the oracle.
     record metadata = {
-        decimals: int,
-        description: option(string),
-        version: int
+        decimals: int,              // Number of decimal places for precision
+        description: option(string),// Oracle description
+        version: int                // Oracle version
         }
 
+    // Datafeed record representing individual rounds of data.
     record datafeed = {
-        round_id: int,
-        answer: int,
-        timestamp: int
+        round_id: int,              // Round ID
+        answer: int,                // Computed answer for this round
+        timestamp: int              // Timestamp when this data was recorded
         }
 
+    /**
+     * Creates a new oracle query with specified time-to-live values for query and response.
+     * @param question The question for the oracle.
+     * @param qttl Time-to-live for the query in blocks.
+     * @param rttl Time-to-live for the response in blocks.
+     * @return The created oracle query.
+     */
     payable stateful entrypoint create_query : (string, int, int) => oracle_query(string, string)
     
+    /**
+     * Retrieves the question of a specified oracle query.
+     * @param query The oracle query.
+     * @return The question associated with the query.
+     */
     entrypoint get_oracle_question: (oracle_query(string, string)) => string
     
+    /**
+     * Retrieves the answer of a specified oracle query, if available.
+     * @param query The oracle query.
+     * @return The answer associated with the query, if any.
+     */    
     entrypoint get_oracle_answer : (oracle_query(string, string)) => option(string)
 
+    /**
+     * Retrieves a stored oracle query by index.
+     * @param last_queries_idx The index of the query to retrieve.
+     * @return The oracle query at the specified index.
+     */
     entrypoint get_query_address : (int) => oracle_query(string, string)
 
+    /**
+     * Retrieves aggregator metadata.
+     * @return Aggregator metadata.
+     */
     entrypoint get_metadata : () => metadata 
 
+    /**
+     * Retrieves data for a specific round.
+     * @param round_id The ID of the round to retrieve.
+     * @return Datafeed associated with the round ID.
+     */
     entrypoint get_round_data : (int) => datafeed
 
+    /**
+     * Retrieves the latest round of data.
+     * @return The most recent datafeed entry.
+     */
     entrypoint latest_round_data : () => datafeed
