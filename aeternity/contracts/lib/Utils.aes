@@ -1,4 +1,18 @@
 namespace Utils =
+    // Function to calculate the absolute difference between two integers
+    function abs(x: int, y: int) : int =
+        if x > y
+            x - y
+        else
+            y - x
+
+    // Function to find the maximum of two integers
+    function max(x: int, y: int) : int =
+        if x > y
+            x
+        else
+            y
+
     function require_positive(prefix: string, x: int) =
         require(x >= 0, String.concat(prefix, ": LP"))
 

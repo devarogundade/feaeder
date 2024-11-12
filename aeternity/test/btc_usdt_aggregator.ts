@@ -3,6 +3,7 @@ import dotenv from 'dotenv';
 import { describe, before, it } from 'node:test';
 import { AeSdk, CompilerHttp, Contract, ContractMethodsBase, MemoryAccount, Node } from '@aeternity/aepp-sdk';
 import { utils } from '@aeternity/aeproject';
+import fs from 'fs';
 import ContractWithMethods from '@aeternity/aepp-sdk/es/contract/Contract';
 dotenv.config();
 
@@ -11,6 +12,7 @@ const AGGREGATOR_CONTRACT_SOURCE = './contracts/Aggregator.aes';
 const VERSION = 1;
 const DECIMALS = 9;
 const DESCRIPTION = "BTC/USDT on-chain price aggregator.";
+const TOLERANCE = 5; // 5 percentage
 
 describe('Bitcoin Usdt Aggregator', () => {
     let aeSdk: AeSdk | null = null;
@@ -33,11 +35,17 @@ describe('Bitcoin Usdt Aggregator', () => {
 
         // initialize the contract instance
         contract = await Contract.initialize({ ...aeSdk.getContext(), sourceCode, fileSystem, verify: true });
-        const args = [DECIMALS, DESCRIPTION, VERSION] as any;
+        fs.mkdirSync('./acis', { recursive: true });
+        fs.writeFileSync('./acis/aggregator.json', JSON.stringify(contract._aci));
+
+        const args = [DECIMALS, DESCRIPTION, VERSION, TOLERANCE] as any;
         const tx = await contract.$deploy(args);
 
-        console.log('Deployed contract with id: ' + tx.result?.contractId);
+        if (!tx.result || !tx.result.contractId) throw new Error('Failed to deploy contract.');
+        else console.log('Deployed contract with id: ' + tx.result?.contractId);
 
+        fs.mkdirSync('./addresses', { recursive: true });
+        fs.writeFileSync('./addresses/btc_usdt_aggregator.txt', tx.result?.contractId);
     });
 
     it('Aggregator: add price data', async () => {

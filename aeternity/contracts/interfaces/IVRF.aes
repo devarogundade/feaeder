@@ -1,7 +1,7 @@
 contract interface IVRF =
 
-    stateful entrypoint fulfill_random_number: ( request_id: int,
-                                                 answer: int
-                                               ) => unit
+  stateful entrypoint fulfill_random_number: (int, int) => unit
 
-    entrypoint get_address: () => address
+  entrypoint get_address: () => address
+
+  entrypoint get_request_fees: () => int

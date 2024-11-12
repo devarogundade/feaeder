@@ -12,6 +12,7 @@ payable contract Aggregator =
         metadata: metadata,
         rounds: map(int, datafeed),
         latest_round_id: int,
+        tolerance: int,
         oracle: oracle(string, string),
         queries: map(int, oracle_query(string, string)),
         last_queries_idx: int
@@ -42,7 +43,8 @@ payable contract Aggregator =
 
     stateful entrypoint init( decimals: int,
                               description: option(string),
-                              version: int
+                              version: int,
+                              tolerance: int
                             ) = 
                             let oracle : oracle(string, string) = register_oracle(10, 50000)
                             
@@ -53,10 +55,11 @@ payable contract Aggregator =
                                     version = version
                                 }
                                 , rounds = {}
-                                , latest_round_id = 0,
-                                oracle = oracle,
-                                queries = {},
-                                last_queries_idx = 0
+                                , latest_round_id = 0
+                                , tolerance = tolerance
+                                , oracle = oracle
+                                , queries = {}
+                                , last_queries_idx = 0
                                 }
 
     // ============== MUTATIVE FUNCTIONS ============== //
@@ -78,17 +81,17 @@ payable contract Aggregator =
         require_relayer()
 
         let round_id : int = state.latest_round_id + 1
-        let answer : int = get_avg_from_data_set(answers)
+        let answer : option(int) = average_if_within_tolerance(answers)
 
         put(state{ rounds[round_id] = {
                     round_id = round_id,
-                    answer = answer,
+                    answer = Option.force(answer),
                     timestamp = timestamp
                     }
                 })
         put(state { latest_round_id = round_id })
 
-        Chain.event(RoundDataAdded(round_id, answer))
+        Chain.event(RoundDataAdded(round_id, Option.force(answer)))
 
     stateful entrypoint update_round_data( round_id: int,
                                            answers: list(int),
@@ -98,16 +101,16 @@ payable contract Aggregator =
 
         require(Map.member(round_id, state.rounds), "INVALID_ROUND_ID")
 
-        let answer : int = get_avg_from_data_set(answers)
+        let answer : option(int) = average_if_within_tolerance(answers)
 
         put(state{ rounds[round_id] = {
                     round_id = round_id,
-                    answer = answer,
+                    answer = Option.force(answer),
                     timestamp = timestamp
                     }
                 })
 
-        Chain.event(RoundDataUpdated(round_id, answer))
+        Chain.event(RoundDataUpdated(round_id, Option.force(answer)))
 
     stateful entrypoint remove_round_data( round_id: int 
                                          ) =
@@ -135,15 +138,40 @@ payable contract Aggregator =
 
     // ============== INTERNAL FUNCTIONS ============== //
     
-    stateful function register_oracle( query_fee : int,
+    stateful private function register_oracle( query_fee : int,
                                        rttl : int
                                      ) : oracle(string, string) =
         Oracle.register(Contract.address, query_fee, RelativeTTL(rttl))
 
-    function get_avg_from_data_set(array: list(int)) : int =
-        let sum = List.sum(array)
-        let lenght = List.length(array)
-        sum / lenght
+    private function average_if_within_tolerance(array: list(int)) : option(int) =
+        if (List.is_empty(array))
+            None
+        else
+            let is_within_tolerance = 
+                List.all(
+                    (x) => List.all((y) => ((abs(x, y) * 100) / max(x, y)) =< state.tolerance, array),
+                    array
+                    )
+
+            if (is_within_tolerance)
+                Some(List.sum(array) / List.length(array))
+            else
+                None
+
+    // Function to calculate the absolute difference between two integers
+    private function abs(x: int, y: int) : int =
+        if (x > y)
+            x - y
+        else
+            y - x
+
+    // Function to find the maximum of two integers
+    private function max(x: int, y: int) : int =
+        if (x > y)
+            x
+        else
+            y
+
 
     // ============== STATE VIEW FUNCTIONS ============== //
 
@@ -158,8 +186,8 @@ payable contract Aggregator =
     stateful entrypoint respond( query : oracle_query(string, string),
                                  answers : list(int)
                                ) =
-        let answer : int = get_avg_from_data_set(answers)
-        Oracle.respond(state.oracle, query, Int.to_str(answer))
+        let answer : option(int) = average_if_within_tolerance(answers)
+        Oracle.respond(state.oracle, query, Int.to_str(Option.force(answer)))
 
     stateful entrypoint extend_oracle(rttl : int) : unit =
         require_relayer()

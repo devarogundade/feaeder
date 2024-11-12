@@ -3,19 +3,22 @@ import dotenv from 'dotenv';
 import { describe, before, it } from 'node:test';
 import { AeSdk, CompilerHttp, Contract, ContractMethodsBase, MemoryAccount, Node } from '@aeternity/aepp-sdk';
 import { utils } from '@aeternity/aeproject';
+import fs from 'fs';
 import ContractWithMethods from '@aeternity/aepp-sdk/es/contract/Contract';
 dotenv.config();
 
 const AGGREGATOR_CONTRACT_SOURCE = './contracts/Aggregator.aes';
 const AGGREGATOR_EXAMPLE_CONTRACT_SOURCE = './contracts/examples/AggregatorExample.aes';
 
-const VERSION = 1;
-
+const BTC_VERSION = 1;
 const BTC_DECIMALS = 9;
 const BTC_DESCRIPTION = "BTC/USDT on-chain price aggregator.";
+const BTC_TOLERANCE = 5; // 5 percentage
 
+const AE_VERSION = 1;
 const AE_DECIMALS = 9;
 const AE_DESCRIPTION = "AE/USDT on-chain price aggregator.";
+const AE_TOLERANCE = 7; // 7 percentage
 
 describe('Bitcoin/Ae Aggregator Example', () => {
     let aeSdk: AeSdk | null = null;
@@ -45,10 +48,14 @@ describe('Bitcoin/Ae Aggregator Example', () => {
         aeAggContract = await Contract.initialize({ ...aeSdk.getContext(), sourceCode: aggSourceCode, fileSystem: aggFileSystem, verify: true });
         exContract = await Contract.initialize({ ...aeSdk.getContext(), sourceCode: exSourceCode, fileSystem: exFileSystem, verify: true });
 
-        const btcArgs = [BTC_DECIMALS, BTC_DESCRIPTION, VERSION] as any;
+        fs.mkdirSync('./acis', { recursive: true });
+        fs.writeFileSync('./acis/aggregator.json', JSON.stringify(btcAggContract._aci));
+        fs.writeFileSync('./acis/aggregator_example.json', JSON.stringify(exContract._aci));
+
+        const btcArgs = [BTC_DECIMALS, BTC_DESCRIPTION, BTC_VERSION, BTC_TOLERANCE] as any;
         const btcTx = await btcAggContract.$deploy(btcArgs);
 
-        const aeArgs = [AE_DECIMALS, AE_DESCRIPTION, VERSION] as any;
+        const aeArgs = [AE_DECIMALS, AE_DESCRIPTION, AE_VERSION, AE_TOLERANCE] as any;
         const aeTx = await aeAggContract.$deploy(aeArgs);
 
         console.log('Deployed contract btc agg with id: ' + btcTx.result?.contractId);
@@ -57,7 +64,11 @@ describe('Bitcoin/Ae Aggregator Example', () => {
         const exArgs = [btcTx.result?.contractId, aeTx.result?.contractId] as any;
         const exTx = await exContract.$deploy(exArgs);
 
-        console.log('Deployed contract example with id: ' + exTx.result?.contractId);
+        if (!exTx.result || !exTx.result.contractId) throw new Error('Failed to deploy contract.');
+        else console.log('Deployed contract with id: ' + exTx.result?.contractId);
+
+        fs.mkdirSync('./addresses', { recursive: true });
+        fs.writeFileSync('./addresses/aggregator_example.txt', exTx.result?.contractId);
     });
 
     it('Aggregator: add price btc data', async () => {

@@ -1,5 +1,3 @@
 contract interface IVRFReceiver =
 
-    stateful entrypoint fulfill_random_number: ( request_id: int,
-                                                 random_number: int
-                                               ) => unit
+  stateful entrypoint fulfill_random_number: (int, int) => unit

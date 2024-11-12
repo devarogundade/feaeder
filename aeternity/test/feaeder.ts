@@ -35,8 +35,11 @@ describe('Feaeder', () => {
 
     const tx = await contract.$deploy([]);
 
-    console.log('Deployed contract with id: ' + tx.result?.contractId);
-    console.log(tx);
+    if (!tx.result || !tx.result.contractId) throw new Error('Failed to deploy contract.');
+    else console.log('Deployed contract with id: ' + tx.result?.contractId);
+
+    fs.mkdirSync('./addresses', { recursive: true });
+    fs.writeFileSync('./addresses/feaeder.txt', tx.result?.contractId);
   });
 
   it('Feaeder: set and get', async () => {
