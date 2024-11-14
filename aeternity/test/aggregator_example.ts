@@ -12,12 +12,12 @@ const AGGREGATOR_EXAMPLE_CONTRACT_SOURCE = './contracts/examples/AggregatorExamp
 
 const BTC_VERSION = 1;
 const BTC_DECIMALS = 9;
-const BTC_DESCRIPTION = "BTC/USDT on-chain price aggregator.";
+const BTC_DESCRIPTION = "BTC/USD on-chain price aggregator.";
 const BTC_TOLERANCE = 5; // 5 percentage
 
 const AE_VERSION = 1;
 const AE_DECIMALS = 9;
-const AE_DESCRIPTION = "AE/USDT on-chain price aggregator.";
+const AE_DESCRIPTION = "AE/USD on-chain price aggregator.";
 const AE_TOLERANCE = 7; // 7 percentage
 
 describe('Bitcoin/Ae Aggregator Example', () => {
@@ -48,10 +48,6 @@ describe('Bitcoin/Ae Aggregator Example', () => {
         aeAggContract = await Contract.initialize({ ...aeSdk.getContext(), sourceCode: aggSourceCode, fileSystem: aggFileSystem, verify: true });
         exContract = await Contract.initialize({ ...aeSdk.getContext(), sourceCode: exSourceCode, fileSystem: exFileSystem, verify: true });
 
-        fs.mkdirSync('./acis', { recursive: true });
-        fs.writeFileSync('./acis/aggregator.json', JSON.stringify(btcAggContract._aci));
-        fs.writeFileSync('./acis/aggregator_example.json', JSON.stringify(exContract._aci));
-
         const btcArgs = [BTC_DECIMALS, BTC_DESCRIPTION, BTC_VERSION, BTC_TOLERANCE] as any;
         const btcTx = await btcAggContract.$deploy(btcArgs);
 
@@ -66,9 +62,6 @@ describe('Bitcoin/Ae Aggregator Example', () => {
 
         if (!exTx.result || !exTx.result.contractId) throw new Error('Failed to deploy contract.');
         else console.log('Deployed contract with id: ' + exTx.result?.contractId);
-
-        fs.mkdirSync('./addresses', { recursive: true });
-        fs.writeFileSync('./addresses/aggregator_example.txt', exTx.result?.contractId);
     });
 
     it('Aggregator: add price btc data', async () => {
@@ -130,7 +123,7 @@ describe('Bitcoin/Ae Aggregator Example', () => {
         const last24h = now - (24 * 60 * 60);
         const question = JSON.stringify({ type: 'ATH', from: last24h, to: now });
         const options = { amount: 10 };
-        const { decodedResult } = await exContract.$call('ask_ae_usdt_all_time_high', [question], options);
+        const { decodedResult } = await exContract.$call('ask_ae_usd_all_time_high', [question], options);
         assert.notEqual(decodedResult, undefined);
 
         console.log('query: ', decodedResult);
@@ -162,7 +155,7 @@ describe('Bitcoin/Ae Aggregator Example', () => {
 
         if (!btcAggContract || !aeAggContract || !exContract || !aeSdk || !query) return;
 
-        const { decodedResult } = await exContract.$call('ae_usdt_all_time_high', [query]);
+        const { decodedResult } = await exContract.$call('ae_usd_all_time_high', [query]);
         assert.notEqual(decodedResult, undefined);
 
         console.log('response: ', decodedResult);
