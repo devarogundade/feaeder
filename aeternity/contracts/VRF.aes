@@ -17,7 +17,7 @@ contract VRF =
     // ============== EVENTS ============== //
 
     datatype event =
-        RandomNumberRequested(int, address, int)
+        RandomNumberRequested(int, address)
         | RandomNumberFulfilled(int)
 
     // ============== INIT FUNCTION ============== //
@@ -30,8 +30,7 @@ contract VRF =
 
     // ============== MUTATIVE FUNCTIONS ============== //
 
-    payable stateful entrypoint request_random_number( max: int
-                                                     ) =
+    payable stateful entrypoint request_random_number() =
         require(state.request_fees == Call.value, "INVALID_FEES")
 
         let sender : address = Call.caller
@@ -42,7 +41,7 @@ contract VRF =
 
         Chain.spend(state.relayer, Call.value)
         
-        Chain.event(RandomNumberRequested(request_id, sender, max))
+        Chain.event(RandomNumberRequested(request_id, sender))
 
         request_id
 

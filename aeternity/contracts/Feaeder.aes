@@ -2,14 +2,15 @@
 
 contract Feaeder =
   record state = {
-    value: int
+    controller: address,
+    allowedList
     }
 
-  stateful entrypoint init() = { value = 0 }
+  datatype event =
+    AggregatorOracleEvent(address, int) |
+    VRFRequestEvent(int, address)
 
-  stateful entrypoint set( new_value: int
-                         ) =
-    put(state { value = new_value })
+  stateful entrypoint init() = { controller = Call.caller }
 
-  entrypoint get(): int = state.value
+  
 

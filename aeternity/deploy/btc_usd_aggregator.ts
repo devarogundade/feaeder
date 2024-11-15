@@ -38,7 +38,7 @@ const run = async () => {
     else console.log('Deployed contract with id: ' + tx.result?.contractId);
 
     fs.mkdirSync('./addresses', { recursive: true });
-    fs.writeFileSync('./addresses/btc_usdt_aggregator.txt', tx.result?.contractId);
+    fs.writeFileSync('./addresses/btc_usd_aggregator.txt', tx.result?.contractId);
 
     if (!tx.result?.contractId) return;
 

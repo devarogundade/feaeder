@@ -27,9 +27,7 @@ contract VRFExample : IVRFReceiver =
     payable stateful entrypoint pick_winner() =
         let request_fees : option(int) = vrf.get_request_fees()
 
-        let max = Some(Map.size(state.players))
-
-        let request_id : option(int) = state.vrf.request_random_number(max, { value = Option.force(request_fees) })
+        let request_id : option(int) = state.vrf.request_random_number(value = Option.force(request_fees))
 
         switch(request_id)
             None => unit
