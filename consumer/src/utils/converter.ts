@@ -12,19 +12,19 @@ const Converter = {
      * @param {number} decimals - The number of decimal places to round the result to.
      * @returns {string} - The converted value as a string.
      */
-    down: function (value: bigint, decimals: number): string {
+    down: function (value: bigint, decimals: number): bigint {
         try {
             // Return '0' if the value is 0, as there's nothing to convert
-            if (value == BigInt(0)) return '0';
+            if (value == BigInt(0)) return value;
 
             // Convert value down to the desired decimal scale using the 'convert' function
             return convert(value, "1", decimals);
         } catch (error) {
             // Log any error that occurs during the conversion process
-            console.error('octas', error);
+            console.error('convert', error);
 
             // Return '0' if there's an error during conversion
-            return '0';
+            return BigInt(0);
         }
     },
 
@@ -36,19 +36,35 @@ const Converter = {
      * @param {number} decimals - The number of decimal places to round the result to.
      * @returns {string} - The converted value as a string.
      */
-    up: function (value: bigint, decimals: number): string {
+    up: function (value: bigint, decimals: number): bigint {
         try {
             // Return '0' if the value is 0, as there's nothing to convert
-            if (value == BigInt(0)) return '0';
+            if (value == BigInt(0)) return value;
 
             // Convert value up to the desired decimal scale using the 'convert' function
             return convert(value, decimals, "1");
         } catch (error) {
             // Log any error that occurs during the conversion process
-            console.error('apt', error);
+            console.error('convert', error);
 
             // Return '0' if there's an error during conversion
-            return '0';
+            return BigInt(0);
+        }
+    },
+
+    convert: function (value: bigint, decimals0: number, decimals1: number): bigint {
+        try {
+            // Return '0' if the value is 0, as there's nothing to convert
+            if (value == BigInt(0)) return value;
+
+            // Convert value up to the desired decimal scale using the 'convert' function
+            return convert(value, decimals0, decimals1);
+        } catch (error) {
+            // Log any error that occurs during the conversion process
+            console.error('convert', error);
+
+            // Return '0' if there's an error during conversion
+            return BigInt(0);
         }
     }
 };

@@ -9,11 +9,9 @@ import { Aggregator } from './database/schemas/aggregator';
 import { Datafeed } from './database/schemas/datafeed';
 import { InjectQueue } from '@nestjs/bullmq';
 import { Paged } from './types';
-import { VRF } from './utils/vrf';
 
 // Define constants for pagination and job scheduling intervals
-const TAKE_SIZE: number = 20; // Number of records to fetch per page
-const REPEAT_INTERVAL: number = 15 * 60 * 1_000; // Repeat interval for jobs in milliseconds (15 minutes)
+const TAKE_SIZE: number = 10; // Number of records to fetch per page
 
 @Injectable()
 export class AppService {
@@ -51,7 +49,7 @@ export class AppService {
     // Define job options to set a repeating job interval for the aggregator
     const jobOptions: JobsOptions = {
       repeat: {
-        every: REPEAT_INTERVAL
+        every: aggregator.pulse
       },
       jobId: aggregator.address // Unique job ID to avoid duplicate jobs
     };
@@ -66,19 +64,24 @@ export class AppService {
   }
 
   // Method to fetch a paginated list of aggregators
-  async getAggregators(page: number = 1): Promise<Paged<Aggregator[]>> {
-    const total = await this.aggregatorModel.countDocuments(); // Total count for pagination
+  async getAggregators(page: number = 1, category: string): Promise<Paged<Aggregator[]>> {
+    const filter = {};
+
+    if (category) {
+      filter['category'] = category;
+    }
+
+    const total = await this.aggregatorModel.countDocuments(filter); // Total count for pagination
 
     // Fetch a limited set of aggregator records with sorting and pagination
-    const data = await this.aggregatorModel.find()
+    const data = await this.aggregatorModel.find(filter)
       .limit(TAKE_SIZE * 1)
       .skip((page - 1) * TAKE_SIZE)
-      .sort({ start_at: 'desc' })
       .exec();
 
     const lastPage = Math.ceil(total / TAKE_SIZE); // Calculate the last page for pagination
 
-    return { total, lastPage, data }; // Return paginated result
+    return { total, lastPage, data, limit: TAKE_SIZE }; // Return paginated result
   }
 
   // Method to fetch a paginated list of datafeeds
@@ -89,12 +92,12 @@ export class AppService {
     const data = await this.datafeedModel.find()
       .limit(TAKE_SIZE * 1)
       .skip((page - 1) * TAKE_SIZE)
-      .sort({ start_at: 'desc' })
+      .sort({ timestamp: -1 }) // Sort by timestamp in descending order
       .exec();
 
     const lastPage = Math.ceil(total / TAKE_SIZE); // Calculate the last page for pagination
 
-    return { total, lastPage, data }; // Return paginated result
+    return { total, lastPage, data, limit: TAKE_SIZE }; // Return paginated result
   }
 
   // Method to fetch paginated datafeeds associated with a specific aggregator
@@ -105,31 +108,22 @@ export class AppService {
     const data = await this.datafeedModel.find({ aggregator })
       .limit(TAKE_SIZE * 1)
       .skip((page - 1) * TAKE_SIZE)
-      .sort({ start_at: 'desc' })
+      .sort({ timestamp: -1 }) // Sort by timestamp in descending order
       .exec();
 
     const lastPage = Math.ceil(total / TAKE_SIZE); // Calculate the last page for pagination
 
-    return { total, lastPage, data }; // Return paginated result
+    return { total, lastPage, data, limit: TAKE_SIZE }; // Return paginated result
   }
 
   async requestVrf(requestId: number, to: `ct_${string}`): Promise<void> {
-    const vrf = new VRF();
-
-    const { randomNumber, hash } = vrf.generate();
-
     const jobOptions: JobsOptions = {
       jobId: requestId.toString() // Unique job ID to avoid duplicate jobs
     };
 
-    this.vrfQueue.add(requestId.toString(), { requestId, randomNumber, to, hash },
+    this.vrfQueue.add(requestId.toString(), { requestId, to },
       jobOptions
     );
-  }
-
-  async verifyVrf(randomNumber: number, hash: string): Promise<boolean> {
-    const vrf = new VRF();
-    return vrf.verify(randomNumber, hash);
   }
 
   async requestAggregator(queryId: string, question: string, to: `ct_${string}`): Promise<void> {
@@ -150,7 +144,7 @@ export class AppService {
     aggregators.forEach(aggregator => {
       const jobOptions: JobsOptions = {
         repeat: {
-          every: REPEAT_INTERVAL
+          every: aggregator.pulse
         },
         jobId: aggregator.address // Unique job ID to prevent duplicates
       };

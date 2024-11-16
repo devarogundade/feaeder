@@ -4,13 +4,14 @@ defmodule Websocket do
   """
   use WebSockex
 
-  @url "wss://testnet.aeternity.io/mdw/v2/websocket"
-  @contract_address "ct_284BS8M4mWXTji2HRYHkMjzx4dLzLqoqZeDA3KYsEf5djvUkEi"
+  @ws_url Application.get_env(:your_app, :ws_url)
+  @aggregators Application.get_env(:your_app, :aggregators)
+  @vrf Application.get_env(:your_app, :vrf)
 
   # Start the WebSocket connection
   def start_link() do
     WebSockex.start_link(
-      @url,
+      @ws_url,
       __MODULE__,
       %{},
       timeout: 10_000 # Timeout set to 10 seconds (10,000 milliseconds)
@@ -20,7 +21,7 @@ defmodule Websocket do
   # Handle WebSocket connection success
   def handle_connect(_conn, state) do
     IO.puts("WebSocket Client Connected")
-    send_subscription_request()
+    send_subscription_requests()
     {:ok, state}
   end
 
@@ -47,13 +48,19 @@ defmodule Websocket do
     {:ok, state}
   end
 
-  # Send a subscription request
-  defp send_subscription_request() do
+  # Send subscription requests for all contract addresses
+  defp send_subscription_requests() do
+    @aggregators
+    |> Enum.each(&send_subscription_request/1)
+  end
+
+  # Send a subscription request for a specific contract address
+  defp send_subscription_request(contract_address) do
     subscription_request =
       %{
         op: "Subscribe",
         payload: "Object",
-        target: @contract_address
+        target: contract_address
       }
       |> Jason.encode!()
 

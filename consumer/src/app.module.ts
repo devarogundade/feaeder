@@ -8,6 +8,8 @@ import { ConfigModule } from '@nestjs/config';
 import { AppController } from './app.controller';
 import { MongooseModule } from '@nestjs/mongoose';
 import { ConsumerWorker } from './workers/consumer';
+import { ConsumerRequestWorker } from './workers/consumer-request';
+import { VRFWorker } from './workers/vrf';
 import { Datafeed, DatafeedSchema } from './database/schemas/datafeed';
 import { Aggregator, AggregatorSchema } from './database/schemas/aggregator';
 
@@ -26,6 +28,8 @@ import { Aggregator, AggregatorSchema } from './database/schemas/aggregator';
 
     // Register 'ConsumerWorker' queue for managing tasks related to consumers
     BullModule.registerQueue({ name: 'ConsumerWorker' }),
+    BullModule.registerQueue({ name: 'ConsumerRequestWorker' }),
+    BullModule.registerQueue({ name: 'VRFWorker' }),
 
     // Configure Mongoose to connect to MongoDB using URL from environment variables
     MongooseModule.forRoot(process.env.MONGO_URL),
@@ -41,7 +45,7 @@ import { Aggregator, AggregatorSchema } from './database/schemas/aggregator';
   controllers: [AppController],
 
   // Define service and worker providers used in this module
-  providers: [AppService, ConsumerWorker],
+  providers: [AppService, ConsumerWorker, ConsumerRequestWorker, VRFWorker],
 })
 
 export class AppModule { }

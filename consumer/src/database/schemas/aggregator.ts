@@ -11,10 +11,16 @@ export class Aggregator {
     address: `ct_${string}`;
 
     @Prop({ required: true })
+    image: string;
+
+    @Prop({ required: true })
     deviationThreshold: number;
 
     @Prop({ required: true })
     heartbeat: number;
+
+    @Prop({ required: true })
+    pulse: number;
 
     @Prop({ required: true })
     updatedAt: number;
@@ -23,7 +29,7 @@ export class Aggregator {
     name: string;
 
     @Prop({ required: true, type: Object })
-    tickers: { [key: string]: string[]; };
+    sources: { [key: string]: string[]; };
 
     @Prop({ required: true })
     description: string;

@@ -16,7 +16,7 @@ export class CoinGecko implements DataSource {
      * @returns Promise<string> - Formatted price of the specified cryptocurrency.
      * @throws Error - If price data cannot be fetched from CoinGecko.
      */
-    async fetchData(tickers: string[], decimals: number): Promise<string> {
+    async fetchData(tickers: string[], decimals: number): Promise<bigint> {
         // Construct the API URL with the specified cryptocurrency and currency
         const url = `https://api.coingecko.com/api/v3/simple/price?ids=${tickers[0]}&vs_currencies=${tickers[1]}`;
 

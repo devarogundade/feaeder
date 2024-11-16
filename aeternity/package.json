@@ -4,10 +4,8 @@
   "description": "This is the default package.json generated for your project",
   "scripts": {
     "feaeder": "npx ts-node ./test/feaeder.ts",
+    "deploy": "npx ts-node ./deploy/index.ts",
     "btc_usd_aggregator": "npx ts-node ./test/btc_usd_aggregator.ts",
-    "deploy btc_usd_aggregator": "npx ts-node ./deploy/btc_usd_aggregator.ts",
-    "deploy eth_usd_aggregator": "npx ts-node ./deploy/eth_usd_aggregator.ts",
-    "deploy ae_usd_aggregator": "npx ts-node ./deploy/ae_usd_aggregator.ts",
     "aggregator_example": "npx ts-node ./test/aggregator_example.ts"
   },
   "dependencies": {

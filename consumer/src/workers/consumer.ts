@@ -13,13 +13,15 @@ import { getSdk } from 'src/utils/aeternity';
 import { aci } from 'src/acis/aggregator';
 import { CMC } from 'src/sources/cmc';
 import { CoinGecko } from 'src/sources/coingecko';
+import { Chainlink } from 'src/sources/chainlink';
 
 // The ConsumerWorker class processes jobs related to data aggregation and blockchain updates
 @Processor('ConsumerWorker')
 export class ConsumerWorker extends WorkerHost {
-    // Instantiating sources to fetch data from CoinMarketCap and CoinGecko
+    // Instantiating sources to fetch data from
     private cmc = new CMC();
     private coinGecko = new CoinGecko();
+    private chainlink = new Chainlink();
 
     constructor(
         @InjectModel(Aggregator.name) private aggregatorModel: Model<Aggregator>,
@@ -57,17 +59,30 @@ export class ConsumerWorker extends WorkerHost {
             const sources = [];
 
             // If CoinMarketCap data is available for the aggregator, fetch the data
-            if (aggregator.tickers[this.cmc.id]) {
-                sources.push(this.cmc.fetchData(aggregator.tickers[this.cmc.id], aggregator.decimals));
+            if (aggregator.sources[this.cmc.id]) {
+                sources.push(
+                    this.cmc.fetchData(aggregator.sources[this.cmc.id], aggregator.decimals)
+                );
             }
 
             // If CoinGecko data is available for the aggregator, fetch the data
-            if (aggregator.tickers[this.coinGecko.id]) {
-                sources.push(this.coinGecko.fetchData(aggregator.tickers[this.coinGecko.id], aggregator.decimals));
+            if (aggregator.sources[this.coinGecko.id]) {
+                sources.push(
+                    this.coinGecko.fetchData(aggregator.sources[this.coinGecko.id], aggregator.decimals)
+                );
+            }
+
+            // If Chainlink data is available for the aggregator, fetch the data
+            if (aggregator.sources[this.chainlink.id]) {
+                sources.push(
+                    this.chainlink.fetchData(aggregator.sources[this.chainlink.id], aggregator.decimals)
+                );
             }
 
             // Wait for all the sources to return data and package them with timestamp
             const answers = await Promise.all(sources);
+
+            console.log('answers', answers);
 
             return { answers, aggregator, timestamp: Date.now() };
         } catch (error) {
@@ -79,10 +94,18 @@ export class ConsumerWorker extends WorkerHost {
 
     // Writes the fetched answer to the database and blockchain if it meets certain conditions
     private async writeAnswer(fetchedAnswer: FetchedAnswer) {
+        console.log('lfslks');
+
         // Calculate the average of the fetched answers
-        const newRoundData = this.getAverage(fetchedAnswer.answers.map(answer => BigInt(answer)));
+        const newRoundData = this.getAverage(fetchedAnswer.answers);
+        console.log('newRoundData', newRoundData);
+
         // Get the latest round data for comparison
         const latestRoundData = await this.getLatestRoundAnswer(fetchedAnswer.aggregator.address);
+
+        console.log('latestRoundData', latestRoundData);
+
+        console.log('isOff', this.isOffByPercent(newRoundData, latestRoundData, fetchedAnswer.aggregator.deviationThreshold));
 
         // Check if the data is off by the allowed percentage or if the heartbeat has expired
         if (
@@ -91,7 +114,7 @@ export class ConsumerWorker extends WorkerHost {
         ) {
             // If the condition is met, create a new datafeed entry
             const datafeed: Datafeed = {
-                answers: fetchedAnswer.answers,
+                answers: fetchedAnswer.answers.map(answer => answer.toString()),
                 aggregator: fetchedAnswer.aggregator.address,
                 timestamp: fetchedAnswer.timestamp
             };

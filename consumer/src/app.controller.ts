@@ -1,6 +1,6 @@
 /* eslint-disable prettier/prettier */
 
-import { Body, Controller, Get, Param, Post } from '@nestjs/common';  // Importing necessary decorators from NestJS
+import { Body, Controller, Get, Post, Query } from '@nestjs/common';  // Importing necessary decorators from NestJS
 import { AppService } from './app.service';  // Service layer to handle business logic
 import { Aggregator } from './database/schemas/aggregator';  // Aggregator schema model for DB operations
 import { Datafeed } from './database/schemas/datafeed';  // Datafeed schema model for DB operations
@@ -27,15 +27,16 @@ export class AppController {
   // GET endpoint to fetch all aggregators, with pagination support via page number
   @Get('/aggregators')
   getAggregators(
-    @Param('page') page: number  // Retrieves the page number from the URL
+    @Query('page') page: number,  // Retrieves the page number from the URL
+    @Query('category') category: string  // Retrieves the category filter from the URL (optional
   ): Promise<Paged<Aggregator[]>> {
-    return this.appService.getAggregators(page);  // Fetches paginated aggregators from the AppService
+    return this.appService.getAggregators(page, category);  // Fetches paginated aggregators from the AppService
   }
 
   // GET endpoint to fetch all datafeeds, with pagination support via page number
   @Get('/datafeeds')
   getDatafeeds(
-    @Param('page') page: number  // Retrieves the page number from the URL
+    @Query('page') page: number  // Retrieves the page number from the URL
   ): Promise<Paged<Datafeed[]>> {
     return this.appService.getDatafeeds(page);  // Fetches paginated datafeeds from the AppService
   }
@@ -43,8 +44,8 @@ export class AppController {
   // GET endpoint to fetch datafeeds associated with a specific aggregator, with pagination support
   @Get('/aggregators-datafeeds')
   getAggregatorDatafeeds(
-    @Param('aggregator') aggregator: string,  // Retrieves the aggregator address or ID
-    @Param('page') page: number  // Retrieves the page number from the URL
+    @Query('aggregator') aggregator: string,  // Retrieves the aggregator address or ID
+    @Query('page') page: number  // Retrieves the page number from the URL
   ): Promise<Paged<Datafeed[]>> {
     return this.appService.getAggregatorDatafeeds(aggregator, page);  // Fetches paginated datafeeds for the specified aggregator
   }

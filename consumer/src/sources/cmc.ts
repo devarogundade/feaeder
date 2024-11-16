@@ -16,7 +16,7 @@ export class CMC implements DataSource {
      * @returns Promise<string> - The formatted price as a string.
      * @throws Error - If the price data cannot be fetched from CoinMarketCap.
      */
-    async fetchData(tickers: string[], decimals: number): Promise<string> {
+    async fetchData(tickers: string[], decimals: number): Promise<bigint> {
         // Construct the API endpoint URL with the specified cryptocurrency and currency symbols
         const url = `https://pro-api.coinmarketcap.com/v1/cryptocurrency/quotes/latest?symbol=${tickers[0]}&convert=${tickers[1]}`;
 
