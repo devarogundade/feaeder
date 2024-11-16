@@ -19,7 +19,7 @@ Object.keys(rawUnits).map(function (unit: any) {
 Units.units = rawUnits;
 
 function convert(value: any, from: any, to: any) {
-    // @ts-expect-error
+    // @ts-ignore
     const result = new BigNumber(value, 10).mul(units[from]).round(0, BigNumber.ROUND_DOWN).div(units[to]);
     return result.toString(10);
 }
