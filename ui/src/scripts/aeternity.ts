@@ -1,10 +1,15 @@
 import { AeSdk, CompilerHttp, Contract, Node } from "@aeternity/aepp-sdk";
 import { aci as feaederAci } from "@/acis/feaeder";
 import { getAccount, getAccounts } from "./connect";
-import type { Subscription } from "@/types";
+import type { Subscription, VRF } from "@/types";
 
 let aeSdk: AeSdk | null = null;
 const feaederId: `ct_${string}` = `ct_E7AN2m8WMzzaCdeSLzj9xSEJZvc2tj5yEySPTXd9G4E8tAWQP`;
+
+export const vrfs: VRF[] = [
+    { name: 'Rnd Number', address: `ct_E7AN2m8WMzzaCdeSLzj9xSEJZvc2tj5yEySPTXd9G4E8tAWQP`, version: 1, queryFee: 0.01 },
+    { name: 'Rnd String', address: `ct_E7AN2m8WMzzaCdeSLzj9xSEJZvc2tj5yEySPTXd9G4E8tAWQP`, version: 1, queryFee: 0.01 },
+];
 
 const getAeSdk = async (): Promise<AeSdk> => {
     if (aeSdk) return aeSdk;
@@ -50,7 +55,6 @@ export async function getSubscription(owner: `ak_${string}`): Promise<Subscripti
         const { decodedResult } = await contract.$call('get_owner_subscription', [owner], {
             callStatic: true
         });
-        console.log(decodedResult);
 
         return decodedResult;
     } catch (error) {

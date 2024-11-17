@@ -1,18 +1,17 @@
 <script setup lang="ts">
 import ArrowRightIcon from '@/components/icons/ArrowRightIcon.vue';
 import CopyIcon from '@/components/icons/CopyIcon.vue';
-import {
-    createSubscription,
-    getSubscription
-} from '@/scripts/aeternity';
+import { getSubscription, vrfs } from '@/scripts/aeternity';
 import Converter from '@/scripts/converter';
+import { useUserStore } from '@/stores/user';
 import { useWalletStore } from '@/stores/wallet';
 import { onMounted, watch } from 'vue';
 
 const walletStore = useWalletStore();
+const userStore = useUserStore();
 
 const fetchOwnerSubscription = async (owner: `ak_${string}`) => {
-    walletStore.setSubscription(await getSubscription(owner));
+    userStore.setSubscription(await getSubscription(owner));
 };
 
 onMounted(() => {
@@ -35,11 +34,8 @@ watch(walletStore, (store) => {
                 <div class="hero">
                     <h3>Feæder Verifiable Randomness Function</h3>
                     <p>Chainlink VRF provides cryptographically secure randomness for your smart contracts.</p>
-                    <button v-if="!walletStore.subscription" @click="createSubscription">Create subscription</button>
 
-                    <RouterLink to="/subscription" v-else>
-                        <button>Manage subscription</button>
-                    </RouterLink>
+                    <a href="https://docs.feaeder.xyz" target="_blank"><button>Read the docs</button></a>
                 </div>
 
                 <div class="table">
@@ -83,41 +79,41 @@ watch(walletStore, (store) => {
                             </div>
                         </div>
                     </div>
-                    <div class="tbody" v-if="walletStore.subscription">
+                    <div class="tbody" v-if="userStore.subscription">
                         <div class="tr">
                             <div class="td">
-                                <RouterLink :to="`/subscriptions/${walletStore.subscription.id}`">
+                                <RouterLink :to="`/subscriptions/${userStore.subscription.id}`">
                                     <div>
                                         <img src="/images/ae.png" alt="">
-                                        <p>{{ walletStore.subscription.id }}</p>
+                                        <p>{{ userStore.subscription.id }}</p>
                                     </div>
                                 </RouterLink>
                             </div>
                             <div class="td">
                                 <div>
-                                    <p>{{ Converter.toChecksumAddress(walletStore.subscription.creator, 4) }}</p>
+                                    <p>{{ Converter.toChecksumAddress(userStore.subscription.creator, 4) }}</p>
                                     <CopyIcon />
                                 </div>
                             </div>
                             <div class="td">
                                 <div>
-                                    <p>{{ Converter.fullMonth(new Date(Number(walletStore.subscription.timestamp))) }}
+                                    <p>{{ Converter.fullMonth(new Date(Number(userStore.subscription.timestamp))) }}
                                     </p>
                                 </div>
                             </div>
                             <div class="td">
                                 <div>
-                                    <p>{{ Number(walletStore.subscription.version).toFixed(1) }}</p>
+                                    <p>{{ Number(userStore.subscription.version).toFixed(1) }}</p>
                                 </div>
                             </div>
                             <div class="td">
                                 <div>
-                                    <p>{{ walletStore.subscription.consumers.length }}</p>
+                                    <p>{{ userStore.subscription.consumers.length }}</p>
                                 </div>
                             </div>
                             <div class="td">
                                 <div>
-                                    <p>{{ walletStore.subscription.balance }} Æ</p>
+                                    <p>{{ userStore.subscription.balance }} Æ</p>
                                 </div>
                             </div>
                         </div>
@@ -128,8 +124,8 @@ watch(walletStore, (store) => {
                     </div>
                 </div>
 
-                <div class="table">
-                    <div class="name">Recent subscriptions</div>
+                <div class="table vrfs">
+                    <div class="name">VRFs</div>
                     <div class="thead">
                         <div class="tr">
                             <div class="td">
@@ -140,13 +136,7 @@ watch(walletStore, (store) => {
                             </div>
                             <div class="td">
                                 <div>
-                                    <p>Creator</p>
-                                    <ArrowRightIcon />
-                                </div>
-                            </div>
-                            <div class="td">
-                                <div>
-                                    <p>Created</p>
+                                    <p>Address</p>
                                     <ArrowRightIcon />
                                 </div>
                             </div>
@@ -158,51 +148,35 @@ watch(walletStore, (store) => {
                             </div>
                             <div class="td">
                                 <div>
-                                    <p>Consumers</p>
-                                    <ArrowRightIcon />
-                                </div>
-                            </div>
-                            <div class="td">
-                                <div>
-                                    <p>Balance</p>
+                                    <p>Query Fee</p>
                                 </div>
                             </div>
                         </div>
                     </div>
                     <div class="tbody">
-                        <div class="tr" v-for="i in 5">
+                        <div class="tr" v-for="vrf in vrfs">
                             <div class="td">
-                                <RouterLink :to="`/feeds/${i}`">
+                                <RouterLink :to="`/vrfs/${vrf.address}`">
                                     <div>
                                         <img src="/images/ae.png" alt="">
-                                        <p>707220...6395</p>
+                                        <p>{{ vrf.name }}</p>
                                     </div>
                                 </RouterLink>
                             </div>
                             <div class="td">
                                 <div>
-                                    <p>ak_ae54...6031</p>
+                                    <p>{{ Converter.toChecksumAddress(vrf.address, 8) }}</p>
                                     <CopyIcon />
                                 </div>
                             </div>
                             <div class="td">
                                 <div>
-                                    <p>November 16, 2024 at 06:46 UTC</p>
+                                    <p>{{ Number(vrf.version).toFixed(1) }}</p>
                                 </div>
                             </div>
                             <div class="td">
                                 <div>
-                                    <p>1.0</p>
-                                </div>
-                            </div>
-                            <div class="td">
-                                <div>
-                                    <p>2</p>
-                                </div>
-                            </div>
-                            <div class="td">
-                                <div>
-                                    <p>1.46 Æ</p>
+                                    <p>{{ vrf.queryFee }} Æ</p>
                                 </div>
                             </div>
                         </div>
@@ -210,7 +184,7 @@ watch(walletStore, (store) => {
                 </div>
 
                 <div class="pagination">
-                    <p>Showing 1 to 5 of 45 entries</p>
+                    <p>Showing all {{ vrfs.length }} entries</p>
                 </div>
             </div>
         </div>
@@ -271,6 +245,10 @@ section {
     grid-template-columns: 1fr 1.2fr 2fr 0.6fr 0.8fr 1.5fr;
     align-items: center;
     height: 50px;
+}
+
+.vrfs .tr {
+    grid-template-columns: 1fr 1.5fr 0.6fr 0.6fr;
 }
 
 .thead .td div {

@@ -10,6 +10,7 @@ import { getSubscription } from '@/scripts/aeternity';
 import { useToast } from 'vue-toast-notification';
 import 'vue-toast-notification/dist/theme-sugar.css';
 import BigNumber from 'bignumber.js';
+import { useUserStore } from '@/stores/user';
 
 const total = ref(1);
 const currentPage = ref(1);
@@ -20,6 +21,7 @@ const toast = useToast({ duration: 4000, position: 'top', dismissible: true });
 const category = ref<FeedsCategory | null>(null);
 const type = ref(FeedsType.Push);
 const walletStore = useWalletStore();
+const userStore = useUserStore();
 
 const selectCategory = (newCategory: string) => {
   if (category.value == newCategory) {
@@ -46,7 +48,7 @@ const getAggregator = async (page: number) => {
 };
 
 const fetchOwnerSubscription = async (owner: `ak_${string}`) => {
-  walletStore.setSubscription(await getSubscription(owner));
+  userStore.setSubscription(await getSubscription(owner));
 };
 
 const copyText = (text: string) => {
@@ -126,41 +128,41 @@ watch(walletStore, (store) => {
               </div>
             </div>
           </div>
-          <div class="tbody" v-if="walletStore.subscription">
+          <div class="tbody" v-if="userStore.subscription">
             <div class="tr">
               <div class="td">
-                <RouterLink :to="`/subscriptions/${walletStore.subscription.id}`">
+                <RouterLink :to="`/subscriptions/${userStore.subscription.id}`">
                   <div>
                     <img src="/images/ae.png" alt="">
-                    <p>{{ walletStore.subscription.id }}</p>
+                    <p>{{ userStore.subscription.id }}</p>
                   </div>
                 </RouterLink>
               </div>
               <div class="td">
                 <div>
-                  <p>{{ Converter.toChecksumAddress(walletStore.subscription.creator, 4) }}</p>
+                  <p>{{ Converter.toChecksumAddress(userStore.subscription.creator, 4) }}</p>
                   <CopyIcon />
                 </div>
               </div>
               <div class="td">
                 <div>
-                  <p>{{ Converter.fullMonth(new Date(Number(walletStore.subscription.timestamp))) }}
+                  <p>{{ Converter.fullMonth(new Date(Number(userStore.subscription.timestamp))) }}
                   </p>
                 </div>
               </div>
               <div class="td">
                 <div>
-                  <p>{{ Number(walletStore.subscription.version).toFixed(1) }}</p>
+                  <p>{{ Number(userStore.subscription.version).toFixed(1) }}</p>
                 </div>
               </div>
               <div class="td">
                 <div>
-                  <p>{{ walletStore.subscription.consumers.length }}</p>
+                  <p>{{ userStore.subscription.consumers.length }}</p>
                 </div>
               </div>
               <div class="td">
                 <div>
-                  <p>{{ walletStore.subscription.balance }} Æ</p>
+                  <p>{{ userStore.subscription.balance }} Æ</p>
                 </div>
               </div>
             </div>

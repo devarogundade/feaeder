@@ -5,6 +5,13 @@ export type Paged<T> = {
     limit: number;
 };
 
+export interface VRF {
+    name: string;
+    address: `ct_${string}`,
+    version: number,
+    queryFee: number;
+}
+
 export type Interval = '1d' | '1w' | '1m';
 
 export type Datafeed = {
