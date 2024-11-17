@@ -1,7 +1,7 @@
 import {
     walletDetector,
     BrowserWindowMessageConnection,
-    // @ts-expect-error
+    // @ts-ignore
     SUBSCRIPTION_TYPES,
     WalletConnectorFrame
 } from '@aeternity/aepp-sdk';
