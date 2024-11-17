@@ -3,6 +3,7 @@
 // Import necessary modules and interfaces
 import Converter from 'src/utils/converter';
 import { DataSource } from './../types';
+import BigNumber from 'bignumber.js';
 
 // CMC class implements the DataSource interface to fetch cryptocurrency prices from CoinMarketCap
 export class CMC implements DataSource {
@@ -16,7 +17,7 @@ export class CMC implements DataSource {
      * @returns Promise<string> - The formatted price as a string.
      * @throws Error - If the price data cannot be fetched from CoinMarketCap.
      */
-    async fetchData(tickers: string[], decimals: number): Promise<bigint> {
+    async fetchData(tickers: string[], decimals: number): Promise<BigNumber> {
         // Construct the API endpoint URL with the specified cryptocurrency and currency symbols
         const url = `https://pro-api.coinmarketcap.com/v1/cryptocurrency/quotes/latest?symbol=${tickers[0]}&convert=${tickers[1]}`;
 
@@ -32,7 +33,7 @@ export class CMC implements DataSource {
         // Check if the response contains valid price data for the specified cryptocurrency and currency
         if (data && data.data && data.data[tickers[0]] && data.data[tickers[0]].quote[tickers[1]]) {
             // Convert and format the retrieved price according to the specified decimal places
-            return Converter.up(data.data[tickers[0]].quote[tickers[1]].price.toString(), decimals);
+            return Converter.up(new BigNumber(data.data[tickers[0]].quote[tickers[1]].price), decimals);
         } else {
             // Throw an error if the price data is not found in the response
             throw new Error('Failed to fetch price from CoinMarketCap');

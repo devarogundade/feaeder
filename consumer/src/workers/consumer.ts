@@ -14,6 +14,7 @@ import { aci } from 'src/acis/aggregator';
 import { CMC } from 'src/sources/cmc';
 import { CoinGecko } from 'src/sources/coingecko';
 import { Chainlink } from 'src/sources/chainlink';
+import BigNumber from 'bignumber.js';
 
 // The ConsumerWorker class processes jobs related to data aggregation and blockchain updates
 @Processor('ConsumerWorker')
@@ -82,8 +83,6 @@ export class ConsumerWorker extends WorkerHost {
             // Wait for all the sources to return data and package them with timestamp
             const answers = await Promise.all(sources);
 
-            console.log('answers', answers);
-
             return { answers, aggregator, timestamp: Date.now() };
         } catch (error) {
             console.error('Error fetching prices:', error);
@@ -94,18 +93,11 @@ export class ConsumerWorker extends WorkerHost {
 
     // Writes the fetched answer to the database and blockchain if it meets certain conditions
     private async writeAnswer(fetchedAnswer: FetchedAnswer) {
-        console.log('lfslks');
-
-        // Calculate the average of the fetched answers
+        // Calculate the average of the fetched answers    
         const newRoundData = this.getAverage(fetchedAnswer.answers);
-        console.log('newRoundData', newRoundData);
 
         // Get the latest round data for comparison
         const latestRoundData = await this.getLatestRoundAnswer(fetchedAnswer.aggregator.address);
-
-        console.log('latestRoundData', latestRoundData);
-
-        console.log('isOff', this.isOffByPercent(newRoundData, latestRoundData, fetchedAnswer.aggregator.deviationThreshold));
 
         // Check if the data is off by the allowed percentage or if the heartbeat has expired
         if (
@@ -142,32 +134,29 @@ export class ConsumerWorker extends WorkerHost {
     }
 
     // Checks if two values are off by a percentage threshold
-    private isOffByPercent(value1: bigint, value2: bigint, percent: number): boolean {
-        // Ensure both values are positive to avoid division by zero and negative percentages
-        if (value1 <= 0 || value2 <= 0) {
-            return false;
-        }
-
+    private isOffByPercent(value1: BigNumber, value2: BigNumber, percent: number): boolean {
         // Calculate the absolute difference between the two values
-        const difference = Math.abs(Number(value1) - Number(value2));
+        const difference = value1.minus(value2).abs();
 
         // If the difference is zero, return false as it's not "off by percentage"
-        if (difference == 0) return false;
+        if (difference.eq(0)) return false;
 
         // Calculate the maximum allowed difference based on the percentage
-        const maxDifference = (Math.max(Number(value1), Number(value2)) / 100) * percent;
+        const maxDifference = BigNumber.max(value1, value2)
+            .div(new BigNumber(100))
+            .times(new BigNumber(percent));
 
         // Return true if the difference exceeds the allowed maximum
-        return difference > maxDifference;
+        return difference.gt(maxDifference);
     }
 
     // Calculates the average of a list of answers
-    private getAverage(answer: bigint[]): bigint {
-        return (answer[0] + answer[1]) / BigInt(answer.length);
+    private getAverage(answers: BigNumber[]): BigNumber {
+        return (answers.reduce((sum, answer) => sum.plus(answer))).div(new BigNumber(answers.length));
     }
 
     // Fetches the latest round answer from the aggregator's smart contract
-    private async getLatestRoundAnswer(address: `ct_${string}`): Promise<bigint> {
+    private async getLatestRoundAnswer(address: `ct_${string}`): Promise<BigNumber> {
         try {
             const aeSdk = getSdk();
             // Initialize the contract for the given address
@@ -175,11 +164,10 @@ export class ConsumerWorker extends WorkerHost {
 
             // Call the `latest_round_data` method from the contract to get the latest round data
             const { decodedResult } = await contract.$call('latest_round_data', []);
-            return decodedResult.answer;
+            return new BigNumber(decodedResult.answer);
         } catch (error) {
-            console.log(error);
             // Return a default value of 0 if there's an error fetching the latest round data
-            return BigInt(0);
+            return new BigNumber(0);
         }
     }
 

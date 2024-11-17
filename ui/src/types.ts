@@ -5,6 +5,11 @@ export type Paged<T> = {
     limit: number;
 };
 
+export type Datafeed = {
+    answers: string[];
+    timestamp: number;
+};
+
 export type Aggregator = {
     address: `ct_${string}`;
     image: string;
@@ -18,6 +23,7 @@ export type Aggregator = {
     category: string;
     version: number;
     decimals: number;
+    latestDataFeed: Datafeed;
 };
 
 export type FeedsCategory = 'crypto' | 'fiat' | 'commodity' | 'rwa';

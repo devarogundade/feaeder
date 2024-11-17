@@ -28,9 +28,10 @@ export class AppController {
   @Get('/aggregators')
   getAggregators(
     @Query('page') page: number,  // Retrieves the page number from the URL
-    @Query('category') category: string  // Retrieves the category filter from the URL (optional
+    @Query('category') category: string,  // Retrieves the category filter from the URL (optional
+    @Query('search') search: string  // Retrieves the search filter from the URL (optional)
   ): Promise<Paged<Aggregator[]>> {
-    return this.appService.getAggregators(page, category);  // Fetches paginated aggregators from the AppService
+    return this.appService.getAggregators(page, category, search);  // Fetches paginated aggregators from the AppService
   }
 
   // GET endpoint to fetch all datafeeds, with pagination support via page number

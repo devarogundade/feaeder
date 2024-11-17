@@ -9,6 +9,8 @@ dotenv.config();
 
 const FEAEDER_CONTRACT_SOURCE = './contracts/Feaeder.aes';
 
+const VERSION = 1;
+
 describe('Feaeder', () => {
   let aeSdk: AeSdk | null = null;
   let contract: ContractWithMethods<ContractMethodsBase> | null = null;
@@ -33,7 +35,9 @@ describe('Feaeder', () => {
     fs.mkdirSync('./acis', { recursive: true });
     fs.writeFileSync('./acis/feaeder.json', JSON.stringify(contract._aci));
 
-    const tx = await contract.$deploy([]);
+    const args = [VERSION] as any;
+
+    const tx = await contract.$deploy(args);
 
     if (!tx.result || !tx.result.contractId) throw new Error('Failed to deploy contract.');
     else console.log('Deployed contract with id: ' + tx.result?.contractId);
@@ -42,15 +46,32 @@ describe('Feaeder', () => {
     fs.writeFileSync('./addresses/feaeder.txt', tx.result?.contractId);
   });
 
-  it('Feaeder: set and get', async () => {
+  it('Feaeder: create subscription', async () => {
     assert.notEqual(contract, null);
     assert.notEqual(aeSdk, null);
 
     if (!contract || !aeSdk) return;
 
-    await contract.$call('set', [42]);
+    await contract.$call('create_subscription', [], { omitUnknown: true, txEvents: true });
 
-    const { decodedResult } = await contract.$call('get', []);
-    assert.equal(decodedResult, 42);
+    const { decodedResult } = await contract.$call('get_owner_subscription', [process.env.PUBLIC_KEY]);
+
+    assert.equal(decodedResult.balance, 0);
   });
+
+  it('Feaeder: top up subscription', async () => {
+    assert.notEqual(contract, null);
+    assert.notEqual(aeSdk, null);
+
+    if (!contract || !aeSdk) return;
+
+    const options = { amount: 100, omitUnknown: true, txEvents: true };
+
+    await contract.$call('topup_subscrption', [], options);
+
+    const { decodedResult } = await contract.$call('get_owner_subscription', [process.env.PUBLIC_KEY]);
+
+    assert.equal(decodedResult.balance, 100);
+  });
+
 });

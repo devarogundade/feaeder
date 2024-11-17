@@ -3,6 +3,7 @@
 include "Option.aes"
 include "String.aes"
 include "List.aes"
+include "./interfaces/IFeaeder.aes"
 
 // @title Aggregator
 // @notice Aggregator Contract to manage and query oracle data feeds, ensuring data reliability with tolerance checking.
@@ -19,7 +20,9 @@ payable contract Aggregator =
         tolerance: int,                 // Acceptable tolerance for data variations
         oracle: oracle(string, string), // Registered oracle
         queries: map(int, oracle_query(string, string)), // Stored oracle queries
-        last_queries_idx: int           // Counter for queries
+        last_queries_idx: int,           // Counter for queries
+        feaeder: IFeaeder,
+        query_fee: int
         }
 
     // ============== RECORDS/STRUCTS ============== //
@@ -58,9 +61,11 @@ payable contract Aggregator =
     stateful entrypoint init( decimals: int,
                               description: option(string),
                               version: int,
-                              tolerance: int
+                              tolerance: int,
+                              feaeder: IFeaeder,
+                              query_fee: int
                             ) = 
-                            let oracle : oracle(string, string) = register_oracle(10, 50000)
+                            let oracle : oracle(string, string) = register_oracle(0, 50000)
                             
                             { relayer = Call.caller
                                 , metadata = {
@@ -74,6 +79,8 @@ payable contract Aggregator =
                                 , oracle = oracle
                                 , queries = {}
                                 , last_queries_idx = 0
+                                , feaeder = feaeder
+                                , query_fee = query_fee
                                 }
 
     // ============== MUTATIVE FUNCTIONS ============== //
@@ -85,11 +92,17 @@ payable contract Aggregator =
      * @param rttl Time-to-live for the response in blocks.
      * @return The created oracle query.
      */
-    payable stateful entrypoint create_query( question : string,     				
-                                              qttl : int,
-                                              rttl : int) : oracle_query(string, string) =
-        let query_fee = Call.value
-        let query : oracle_query(string, string) = Oracle.query(state.oracle, question, query_fee, RelativeTTL(qttl), RelativeTTL(rttl))
+    stateful entrypoint create_query( subscription_id: int,
+                                      question : string,     				
+                                      qttl : int,
+                                      rttl : int) : oracle_query(string, string) =
+        state.feaeder.use_subscription(
+            subscription_id,
+            Call.caller,
+            state.query_fee
+            )
+        
+        let query = Oracle.query(state.oracle, question, 0, RelativeTTL(qttl), RelativeTTL(rttl))
 
         put(state{ last_queries_idx = state.last_queries_idx + 1 })
         put(state{ queries[state.last_queries_idx] = query })
@@ -205,8 +218,8 @@ payable contract Aggregator =
      * @return A new oracle instance.
      */    
     stateful private function register_oracle( query_fee : int,
-                                       rttl : int
-                                     ) : oracle(string, string) =
+                                               rttl : int
+                                              ) : oracle(string, string) =
         Oracle.register(Contract.address, query_fee, RelativeTTL(rttl))
 
     /**

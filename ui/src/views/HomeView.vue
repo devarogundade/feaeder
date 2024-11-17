@@ -7,6 +7,7 @@ import { FeedsType, type Aggregator, type FeedsCategory } from '@/types';
 import { onMounted, ref } from 'vue';
 import { useToast } from 'vue-toast-notification';
 import 'vue-toast-notification/dist/theme-sugar.css';
+import BigNumber from 'bignumber.js';
 
 const total = ref(1);
 const currentPage = ref(1);
@@ -233,7 +234,21 @@ onMounted(() => {
               </div>
               <div class="td">
                 <div>
-                  <p>$3,503.95</p>
+                  <p>
+                    {{ aggregator.name.endsWith('USD') ? '$' : '' }}
+                    {{ aggregator.name.endsWith('ETH') ? 'Ξ' : '' }}
+                    {{ aggregator.name.endsWith('BTC') ? '₿' : '' }}
+                    {{ aggregator.name.endsWith('EUR') ? '€' : '' }}
+
+                    {{
+                      Converter.toMoney(
+                        Converter.down(
+                          Converter.getAverage(aggregator.latestDataFeed.answers.map(answer => new BigNumber(answer))),
+                          aggregator.decimals
+                        )
+                      )
+                    }}
+                  </p>
                 </div>
               </div>
               <div class="td">

@@ -55,9 +55,11 @@ const connect = async () => {
                             <input type="text" placeholder="Search data feeds" />
                         </div>
 
-                        <button class="docs">
-                            <DiscoverIcon :color="'var(--tx-semi)'" />
-                        </button>
+                        <a href="https://docs.feaeder.xyz" target="_blank">
+                            <button class="docs">
+                                <DiscoverIcon :color="'var(--tx-semi)'" />
+                            </button>
+                        </a>
 
                         <button class="connect_wallet" @click="connect">
                             {{ walletStore.address ?

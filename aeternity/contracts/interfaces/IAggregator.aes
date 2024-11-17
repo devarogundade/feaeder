@@ -21,7 +21,7 @@ contract interface IAggregator =
      * @param rttl Time-to-live for the response in blocks.
      * @return The created oracle query.
      */
-    payable stateful entrypoint create_query : (string, int, int) => oracle_query(string, string)
+    stateful entrypoint create_query : (int, string, int, int) => oracle_query(string, string)
     
     /**
      * Retrieves the question of a specified oracle query.

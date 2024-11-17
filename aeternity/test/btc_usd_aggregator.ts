@@ -7,16 +7,19 @@ import fs from 'fs';
 import ContractWithMethods from '@aeternity/aepp-sdk/es/contract/Contract';
 dotenv.config();
 
+const FEAEDER_CONTRACT_SOURCE = './contracts/Feaeder.aes';
 const AGGREGATOR_CONTRACT_SOURCE = './contracts/Aggregator.aes';
 
 const VERSION = 1;
 const DECIMALS = 9;
 const DESCRIPTION = "BTC/USD on-chain price aggregator.";
 const TOLERANCE = 5; // 5 percentage
+const QUERY_FEE = 1_000_000;
 
 describe('Bitcoin Usd Aggregator', () => {
     let aeSdk: AeSdk | null = null;
     let contract: ContractWithMethods<ContractMethodsBase> | null = null;
+    let fdContract: ContractWithMethods<ContractMethodsBase> | null = null;
 
     before(async () => {
         aeSdk = new AeSdk({
@@ -29,18 +32,30 @@ describe('Bitcoin Usd Aggregator', () => {
 
         // a filesystem object must be passed to the compiler if the contract uses custom includes
         const fileSystem = utils.getFilesystem(AGGREGATOR_CONTRACT_SOURCE);
+        const fdFileSystem = utils.getFilesystem(FEAEDER_CONTRACT_SOURCE);
 
         // get content of contract
         const sourceCode = utils.getContractContent(AGGREGATOR_CONTRACT_SOURCE);
+        const fdSourceCode = utils.getContractContent(FEAEDER_CONTRACT_SOURCE);
 
         // initialize the contract instance
         contract = await Contract.initialize({ ...aeSdk.getContext(), sourceCode, fileSystem, verify: true });
+        fdContract = await Contract.initialize({ ...aeSdk.getContext(), sourceCode: fdSourceCode, fileSystem: fdFileSystem, verify: true });
 
-        const args = [DECIMALS, DESCRIPTION, VERSION, TOLERANCE] as any;
+        const fdArgs = [VERSION] as any;
+        const fdTx = await fdContract.$deploy(fdArgs);
+
+        const feaeder = fdTx.result?.contractId;
+
+        const args = [DECIMALS, DESCRIPTION, VERSION, TOLERANCE, feaeder, QUERY_FEE] as any;
         const tx = await contract.$deploy(args);
 
         if (!tx.result || !tx.result.contractId) throw new Error('Failed to deploy contract.');
         else console.log('Deployed contract with id: ' + tx.result?.contractId);
+
+        const txAdd = await fdContract.$call('add_allowed_contract', [tx.result?.contractId.replace('ct', 'ak')]);
+
+        console.log(txAdd);
     });
 
     it('Aggregator: add price data', async () => {

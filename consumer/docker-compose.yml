@@ -1,0 +1,30 @@
+services:
+  feaeder-consumer:
+    depends_on:
+      - redis
+    image: devarogundade/feaeder-consumer:latest
+    container_name: feaeder-consumer
+    restart: always
+    ports:
+      - "3000:3000"
+    env_file: .env
+    networks:
+      - feaeder-net
+  
+  redis:
+    image: "redis:alpine"
+    container_name: redis
+    restart: always
+    ports:
+      - "6379:6379"
+    volumes:
+      - "redis-data:/data"
+    networks:
+      - feaeder-net
+
+volumes:
+  redis-data:
+
+networks:
+  feaeder-net:
+    driver: bridge

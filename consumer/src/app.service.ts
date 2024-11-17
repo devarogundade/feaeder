@@ -64,20 +64,46 @@ export class AppService {
   }
 
   // Method to fetch a paginated list of aggregators
-  async getAggregators(page: number = 1, category: string): Promise<Paged<Aggregator[]>> {
+  async getAggregators(page: number = 1, category: string, search: string): Promise<Paged<Aggregator[]>> {
     const filter = {};
 
-    if (category) {
+    if (category && category.length > 0) {
       filter['category'] = category;
+    }
+
+    if (search && search.length > 0) {
+      filter['$or'] = [
+        { name: { $regex: search, $options: 'i' } },
+        { description: { $regex: search, $options: 'i' } }
+      ];
     }
 
     const total = await this.aggregatorModel.countDocuments(filter); // Total count for pagination
 
     // Fetch a limited set of aggregator records with sorting and pagination
-    const data = await this.aggregatorModel.find(filter)
-      .limit(TAKE_SIZE * 1)
-      .skip((page - 1) * TAKE_SIZE)
-      .exec();
+    const data = await this.aggregatorModel.aggregate([
+      { $match: filter },
+      {
+        $lookup: {
+          from: 'datafeeds',
+          localField: 'address',
+          foreignField: 'aggregator',
+          as: 'datafeeds'
+        }
+      },
+      { $unwind: '$datafeeds' },
+      { $sort: { 'aggregator.name': 1, 'datafeeds.timestamp': -1 } },
+      {
+        $group: {
+          _id: '$_id',
+          root: { $first: '$$ROOT' },
+          latestDataFeed: { $first: '$datafeeds' }
+        }
+      },
+      { $replaceRoot: { newRoot: { $mergeObjects: ['$root', { latestDataFeed: '$latestDataFeed' }] } } },
+      { $skip: (page - 1) * TAKE_SIZE },
+      { $limit: TAKE_SIZE }
+    ]).exec();
 
     const lastPage = Math.ceil(total / TAKE_SIZE); // Calculate the last page for pagination
 

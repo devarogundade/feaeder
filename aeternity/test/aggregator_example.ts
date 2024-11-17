@@ -7,6 +7,7 @@ import fs from 'fs';
 import ContractWithMethods from '@aeternity/aepp-sdk/es/contract/Contract';
 dotenv.config();
 
+const FEAEDER_CONTRACT_SOURCE = './contracts/Feaeder.aes';
 const AGGREGATOR_CONTRACT_SOURCE = './contracts/Aggregator.aes';
 const AGGREGATOR_EXAMPLE_CONTRACT_SOURCE = './contracts/examples/AggregatorExample.aes';
 
@@ -20,11 +21,15 @@ const AE_DECIMALS = 9;
 const AE_DESCRIPTION = "AE/USD on-chain price aggregator.";
 const AE_TOLERANCE = 7; // 7 percentage
 
+const QUERY_FEE = 1_000_000;
+const VERSION = 1;
+
 describe('Bitcoin/Ae Aggregator Example', () => {
     let aeSdk: AeSdk | null = null;
     let btcAggContract: ContractWithMethods<ContractMethodsBase> | null = null;
     let aeAggContract: ContractWithMethods<ContractMethodsBase> | null = null;
     let exContract: ContractWithMethods<ContractMethodsBase> | null = null;
+    let fdContract: ContractWithMethods<ContractMethodsBase> | null = null;
 
     before(async () => {
         aeSdk = new AeSdk({
@@ -38,20 +43,31 @@ describe('Bitcoin/Ae Aggregator Example', () => {
         // a filesystem object must be passed to the compiler if the contract uses custom includes
         const aggFileSystem = utils.getFilesystem(AGGREGATOR_CONTRACT_SOURCE);
         const exFileSystem = utils.getFilesystem(AGGREGATOR_EXAMPLE_CONTRACT_SOURCE);
+        const fdFileSystem = utils.getFilesystem(FEAEDER_CONTRACT_SOURCE);
 
         // get content of contracts
         const aggSourceCode = utils.getContractContent(AGGREGATOR_CONTRACT_SOURCE);
         const exSourceCode = utils.getContractContent(AGGREGATOR_EXAMPLE_CONTRACT_SOURCE);
+        const fdSourceCode = utils.getContractContent(FEAEDER_CONTRACT_SOURCE);
 
         // initialize the contracts instance
         btcAggContract = await Contract.initialize({ ...aeSdk.getContext(), sourceCode: aggSourceCode, fileSystem: aggFileSystem, verify: true });
         aeAggContract = await Contract.initialize({ ...aeSdk.getContext(), sourceCode: aggSourceCode, fileSystem: aggFileSystem, verify: true });
         exContract = await Contract.initialize({ ...aeSdk.getContext(), sourceCode: exSourceCode, fileSystem: exFileSystem, verify: true });
+        fdContract = await Contract.initialize({ ...aeSdk.getContext(), sourceCode: fdSourceCode, fileSystem: fdFileSystem, verify: true });
 
-        const btcArgs = [BTC_DECIMALS, BTC_DESCRIPTION, BTC_VERSION, BTC_TOLERANCE] as any;
+        const fdArgs = [VERSION] as any;
+        const fdTx = await fdContract.$deploy(fdArgs);
+
+        const feaeder = fdTx.result?.contractId;
+
+        fs.mkdirSync('./acis', { recursive: true });
+        fs.writeFileSync('./acis/feaeder.json', JSON.stringify(fdContract._aci));
+
+        const btcArgs = [BTC_DECIMALS, BTC_DESCRIPTION, BTC_VERSION, BTC_TOLERANCE, feaeder, QUERY_FEE] as any;
         const btcTx = await btcAggContract.$deploy(btcArgs);
 
-        const aeArgs = [AE_DECIMALS, AE_DESCRIPTION, AE_VERSION, AE_TOLERANCE] as any;
+        const aeArgs = [AE_DECIMALS, AE_DESCRIPTION, AE_VERSION, AE_TOLERANCE, feaeder, QUERY_FEE] as any;
         const aeTx = await aeAggContract.$deploy(aeArgs);
 
         console.log('Deployed contract btc agg with id: ' + btcTx.result?.contractId);
@@ -62,6 +78,12 @@ describe('Bitcoin/Ae Aggregator Example', () => {
 
         if (!exTx.result || !exTx.result.contractId) throw new Error('Failed to deploy contract.');
         else console.log('Deployed contract with id: ' + exTx.result?.contractId);
+
+        const txAdd = await fdContract.$call('add_allowed_contract', [btcTx.result?.contractId.replace('ct', 'ak')]);
+        console.log(txAdd);
+
+        const txAdd1 = await fdContract.$call('add_allowed_contract', [aeTx.result?.contractId.replace('ct', 'ak')]);
+        console.log(txAdd1);
     });
 
     it('Aggregator: add price btc data', async () => {

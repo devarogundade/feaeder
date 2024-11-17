@@ -1,3 +1,5 @@
+import Feaeder from './feaeder';
+
 import AeUSDAg from './ae_usd_aggregator';
 import BnbUsdAg from './bnb_usd_aggregator';
 import BtcEthAg from './btc_eth_aggregator';
@@ -15,22 +17,52 @@ import XagUsdAg from './xag_usd_aggregator';
 import XauUsdAg from './xau_usd_aggregator';
 
 const deploy = async () => {
-    await AeUSDAg.run();
-    await BnbUsdAg.run();
-    await BtcEthAg.run();
-    await BtcUsdAg.run();
-    await BnbUsdAg.run();
-    await CnyUsdAg.run();
-    await EthBtcAg.run();
-    await EthUsdAg.run();
-    await EurUsdAg.run();
-    await GbpUsdAg.run();
-    await SolUsdAg.run();
-    await UniUsdAg.run();
-    await UsdcUsdAg.run();
-    await UsdtUsdAg.run();
-    await XagUsdAg.run();
-    await XauUsdAg.run();
+    const feaeder = await Feaeder.run();
+
+    const aeUsdAg = await AeUSDAg.run(feaeder.contractId);
+    await Feaeder.addAllowedContract(feaeder.contract, aeUsdAg);
+
+    const bnbUsdAg = await BnbUsdAg.run(feaeder.contractId);
+    await Feaeder.addAllowedContract(feaeder.contract, bnbUsdAg);
+
+    const btcEthAg = await BtcEthAg.run(feaeder.contractId);
+    await Feaeder.addAllowedContract(feaeder.contract, btcEthAg);
+
+    const btcUsdAg = await BtcUsdAg.run(feaeder.contractId);
+    await Feaeder.addAllowedContract(feaeder.contract, btcUsdAg);
+
+    const cnyUsdAg = await CnyUsdAg.run(feaeder.contractId);
+    await Feaeder.addAllowedContract(feaeder.contract, cnyUsdAg);
+
+    const ethBtcAg = await EthBtcAg.run(feaeder.contractId);
+    await Feaeder.addAllowedContract(feaeder.contract, ethBtcAg);
+
+    const ethUsdAg = await EthUsdAg.run(feaeder.contractId);
+    await Feaeder.addAllowedContract(feaeder.contract, ethUsdAg);
+
+    const eurUsdAg = await EurUsdAg.run(feaeder.contractId);
+    await Feaeder.addAllowedContract(feaeder.contract, eurUsdAg);
+
+    const gbpUsdAg = await GbpUsdAg.run(feaeder.contractId);
+    await Feaeder.addAllowedContract(feaeder.contract, gbpUsdAg);
+
+    const solUsdAg = await SolUsdAg.run(feaeder.contractId);
+    await Feaeder.addAllowedContract(feaeder.contract, solUsdAg);
+
+    const uniUsdAg = await UniUsdAg.run(feaeder.contractId);
+    await Feaeder.addAllowedContract(feaeder.contract, uniUsdAg);
+
+    const usdcUsdAg = await UsdcUsdAg.run(feaeder.contractId);
+    await Feaeder.addAllowedContract(feaeder.contract, usdcUsdAg);
+
+    const usdtUsdAg = await UsdtUsdAg.run(feaeder.contractId);
+    await Feaeder.addAllowedContract(feaeder.contract, usdtUsdAg);
+
+    const xagUsdAg = await XagUsdAg.run(feaeder.contractId);
+    await Feaeder.addAllowedContract(feaeder.contract, xagUsdAg);
+
+    const xauUsdAg = await XauUsdAg.run(feaeder.contractId);
+    await Feaeder.addAllowedContract(feaeder.contract, xauUsdAg);
 };
 
 deploy();

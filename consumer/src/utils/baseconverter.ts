@@ -36,15 +36,8 @@ Object.keys(rawUnits).map(function (unit: any) {
 
 Units.units = rawUnits;
 
-function convert(value: any, from: any, to: any) {
-    const result = new BigNumber(Number(value)
-        .toFixed(0), 10)
-        // eslint-disable-next-line @typescript-eslint/ban-ts-comment
-        // @ts-ignore
-        .mul(units[from]).round(0, BigNumber.ROUND_DOWN)
-        .div(units[to]);
-
-    return result.toString(10);
+function convert(value: BigNumber, from: any, to: any): BigNumber {
+    return value.div(units[to]).times(units[from]);
 }
 
 export default convert;

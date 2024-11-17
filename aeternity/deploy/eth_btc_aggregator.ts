@@ -10,9 +10,10 @@ const VERSION = 1;
 const DECIMALS = 18;
 const DESCRIPTION = "ETH/BTC on-chain price aggregator.";
 const TOLERANCE = 5; // 5 percentage
+const QUERY_FEE = 1_000_000;
 
 const EthBtcAg = {
-    run: async (): Promise<void> => {
+    run: async (feaeder: string): Promise<string> => {
         const aeSdk = new AeSdk({
             onCompiler: new CompilerHttp('https://v8.compiler.aepps.com'),
             accounts: [new MemoryAccount(process.env.SECRET_KEY as `sk_${string}`)],
@@ -32,7 +33,7 @@ const EthBtcAg = {
         fs.mkdirSync('./acis', { recursive: true });
         fs.writeFileSync('./acis/aggregator.json', JSON.stringify(contract._aci));
 
-        const args = [DECIMALS, DESCRIPTION, VERSION, TOLERANCE] as any;
+        const args = [DECIMALS, DESCRIPTION, VERSION, TOLERANCE, feaeder, QUERY_FEE] as any;
         const tx = await contract.$deploy(args);
 
         if (!tx.result || !tx.result.contractId) throw new Error('Failed to deploy contract.');
@@ -41,7 +42,7 @@ const EthBtcAg = {
         fs.mkdirSync('./addresses', { recursive: true });
         fs.writeFileSync('./addresses/eth_btc_aggregator.txt', tx.result?.contractId);
 
-        if (!tx.result?.contractId) return;
+        if (!tx.result?.contractId) throw new Error('Failed to deploy');
 
         const data = await fetch(`http://localhost:3000/add-aggregator`, {
             method: 'POST',
@@ -50,7 +51,7 @@ const EthBtcAg = {
             },
             body: JSON.stringify({
                 address: tx.result?.contractId,
-                image: 'https://feaeder.netlify.app/images/eth.png',
+                image: 'https://feaeder.xyz/images/eth.png',
                 deviationThreshold: 0.5,
                 pulse: 600_000,
                 heartbeat: 1_200_000,
@@ -69,6 +70,8 @@ const EthBtcAg = {
         const response = await data.json();
 
         console.log('Aggregator ETH/BTC hosted: ' + JSON.stringify(response, null, 2));
+
+        return tx.result?.contractId;
     }
 };
 

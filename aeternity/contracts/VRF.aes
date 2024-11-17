@@ -2,7 +2,7 @@
 
 include "Option.aes"
 include "String.aes"
-
+include "./interfaces/IFeaeder.aes"
 include "./interfaces/IVRFReceiver.aes"
 
 contract VRF =
@@ -10,8 +10,9 @@ contract VRF =
 
     record state = {
         relayer: address,
-        request_fees: int,
-        last_request_id: int
+        last_request_id: int,
+        feaeder: IFeaeder,
+        query_fee: int
         }
 
     // ============== EVENTS ============== //
@@ -22,24 +23,29 @@ contract VRF =
 
     // ============== INIT FUNCTION ============== //
 
-    stateful entrypoint init( request_fees: int
+    stateful entrypoint init( feaeder: IFeaeder,
+                              query_fee: int
                             ) = { relayer = Call.caller
-                                , request_fees = request_fees
                                 , last_request_id = 0
+                                , feaeder = feaeder
+                                , query_fee = query_fee
                                 }
 
     // ============== MUTATIVE FUNCTIONS ============== //
 
-    payable stateful entrypoint request_random_number() =
-        require(state.request_fees == Call.value, "INVALID_FEES")
-
+    stateful entrypoint request_random_number( subscription_id: int
+                                             ) =
+        state.feaeder.use_subscription(
+            subscription_id,
+            Call.caller,
+            state.query_fee
+            )
+            
         let sender : address = Call.caller
 
         let request_id = state.last_request_id + 1
         
         put(state { last_request_id = request_id })
-
-        Chain.spend(state.relayer, Call.value)
         
         Chain.event(RandomNumberRequested(request_id, sender))
 
@@ -62,7 +68,7 @@ contract VRF =
 
     // ============== STATE VIEW FUNCTIONS ============== //
 
-    entrypoint get_request_fees(): int = state.request_fees 
+    entrypoint get_request_fees(): int = state.query_fee 
 
     entrypoint get_state(): state = state
 

@@ -1,0 +1,3 @@
+contract interface IFeaeder =
+
+  stateful entrypoint use_subscription: (int, address, int) => unit
