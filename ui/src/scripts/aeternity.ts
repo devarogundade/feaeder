@@ -1,13 +1,14 @@
 import { AeSdk, CompilerHttp, Contract, Node } from "@aeternity/aepp-sdk";
 import { aci as feaederAci } from "@/acis/feaeder";
-import { getAccount, getAccounts } from "./connect";
+import { getAccounts } from "./connect";
 import type { Subscription, VRF } from "@/types";
+import type BigNumber from "bignumber.js";
 
 let aeSdk: AeSdk | null = null;
-const feaederId: `ct_${string}` = `ct_E7AN2m8WMzzaCdeSLzj9xSEJZvc2tj5yEySPTXd9G4E8tAWQP`;
+const feaederId: `ct_${string}` = `ct_2Z3KJHcBtcCPJrbApBXSXgrqxJ5dzUtpMYCBSxzNEmXEdUPx1z`;
 
 export const vrfs: VRF[] = [
-    { name: 'Rnd Number', address: `ct_E7AN2m8WMzzaCdeSLzj9xSEJZvc2tj5yEySPTXd9G4E8tAWQP`, version: 1, queryFee: 0.01 },
+    { name: 'Rnd Number', address: `ct_2Z3KJHcBtcCPJrbApBXSXgrqxJ5dzUtpMYCBSxzNEmXEdUPx1z`, version: 1, queryFee: 0.01 },
     { name: 'Rnd String', address: `ct_E7AN2m8WMzzaCdeSLzj9xSEJZvc2tj5yEySPTXd9G4E8tAWQP`, version: 1, queryFee: 0.01 },
 ];
 
@@ -63,7 +64,7 @@ export async function addConsumer(consumer: `ct_${string}`): Promise<`th_${strin
     }
 }
 
-export async function removeConsumer(consumer: `ct_${string}`): Promise<`th_${string}` | null> {
+export async function removeConsumer(consumer: `ak_${string}`): Promise<`th_${string}` | null> {
     try {
         const aeSdk = await getAeSdk();
 
@@ -71,7 +72,47 @@ export async function removeConsumer(consumer: `ct_${string}`): Promise<`th_${st
             ...aeSdk.getContext(), aci: feaederAci, address: feaederId
         });
 
-        const receipt = await contract.$call('remove_consumer', [consumer.replace('ct', 'ak')], {
+        const receipt = await contract.$call('remove_consumer', [consumer], {
+            omitUnknown: true
+        });
+
+        return receipt.hash;
+    } catch (error) {
+        console.log(error);
+        return null;
+    }
+}
+
+export async function topUpSubscription(amount: BigNumber): Promise<`th_${string}` | null> {
+    try {
+        const aeSdk = await getAeSdk();
+
+        const contract = await Contract.initialize({
+            ...aeSdk.getContext(), aci: feaederAci, address: feaederId
+        });
+
+        const receipt = await contract.$call('topup_subscrption', [], {
+            // @ts-ignore
+            amount,
+            omitUnknown: true
+        });
+
+        return receipt.hash;
+    } catch (error) {
+        console.log(error);
+        return null;
+    }
+}
+
+export async function withdrawSubscription(amount: BigNumber): Promise<`th_${string}` | null> {
+    try {
+        const aeSdk = await getAeSdk();
+
+        const contract = await Contract.initialize({
+            ...aeSdk.getContext(), aci: feaederAci, address: feaederId
+        });
+
+        const receipt = await contract.$call('withdraw_subscription', [amount], {
             omitUnknown: true
         });
 

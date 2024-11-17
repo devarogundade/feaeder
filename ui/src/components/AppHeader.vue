@@ -67,9 +67,11 @@ const connect = async () => {
                             </button>
                         </a>
 
-                        <Button :loading="connectingWallet" @click="connect" :text="walletStore.address ?
-                            Converter.toChecksumAddress(walletStore.address) :
-                            'Connect wallet'" />
+                        <Button v-if="!walletStore.address" :loading="connectingWallet" @click="connect"
+                            :text="'Connect wallet'" />
+                        <RouterLink to="/subscription" v-else>
+                            <Button :text="'My Subscrption'" />
+                        </RouterLink>
                     </div>
                 </div>
             </header>

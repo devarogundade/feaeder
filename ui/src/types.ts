@@ -47,6 +47,6 @@ export interface Subscription {
     balance: number;
     spent: number;
     creator: `ak_${string}`,
-    consumers: string[];
+    consumers: `ak_${string}`[];
     timestamp: bigint;
 }

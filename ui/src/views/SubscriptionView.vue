@@ -1,7 +1,7 @@
 <script setup lang="ts">
 import { useUserStore } from '@/stores/user';
 import { useWalletStore } from '@/stores/wallet';
-import { createSubscription, getSubscription, addConsumer } from '@/scripts/aeternity';
+import { createSubscription, getSubscription, addConsumer, removeConsumer, topUpSubscription, withdrawSubscription } from '@/scripts/aeternity';
 import { useToast } from 'vue-toast-notification';
 import 'vue-toast-notification/dist/theme-sugar.css';
 import Converter from '@/scripts/converter';
@@ -10,6 +10,7 @@ import ProgressBox from '@/components/ProgressBox.vue';
 import Button from '@/components/Button.vue';
 import TicketIcon from '@/components/icons/TicketIcon.vue';
 import InfoIcon from '@/components/icons/InfoIcon.vue';
+import BigNumber from 'bignumber.js';
 
 const walletStore = useWalletStore();
 const userStore = useUserStore();
@@ -17,6 +18,9 @@ const toast = useToast({ duration: 4000, position: 'top', dismissible: true });
 const fetchingSubscription = ref(false);
 const creatingSubscription = ref(false);
 const addingConsumer = ref(false);
+const removingConsumer = ref<string | null>(null);
+const toppingUp = ref(false);
+const withdrawing = ref(false);
 
 const fetchOwnerSubscription = async (owner: `ak_${string}`, progress = true) => {
     fetchingSubscription.value = progress;
@@ -30,6 +34,62 @@ const copyText = (text: string) => {
     toast.success(text);
 };
 
+const topUp = async () => {
+    if (!walletStore.address) {
+        toast.warning('Please connect your wallet');
+        return;
+    }
+    if (toppingUp.value) return;
+
+    toppingUp.value = true;
+
+    const amount = prompt('Enter an amount in Æ');
+
+    if (!amount) {
+        toppingUp.value = false;
+        return;
+    }
+
+    const txHash = await topUpSubscription(Converter.up(new BigNumber(amount), 18));
+
+    if (txHash) {
+        toast.success('Subscription topped up');
+        fetchOwnerSubscription(walletStore.address, false);
+    } else {
+        toast.error('Subscription topping up failed');
+    }
+
+    toppingUp.value = false;
+};
+
+const withdraw = async () => {
+    if (!walletStore.address) {
+        toast.warning('Please connect your wallet');
+        return;
+    }
+    if (withdrawing.value) return;
+
+    withdrawing.value = true;
+
+    const amount = prompt('Enter an amount in Æ');
+
+    if (!amount) {
+        withdrawing.value = false;
+        return;
+    }
+
+    const txHash = await withdrawSubscription(Converter.up(new BigNumber(amount), 18));
+
+    if (txHash) {
+        toast.success('Subscription withdrawn');
+        fetchOwnerSubscription(walletStore.address, false);
+    } else {
+        toast.error('Subscription withdrawing failed');
+    }
+
+    withdrawing.value = false;
+};
+
 const newConsumer = async () => {
     if (!walletStore.address) {
         toast.warning('Please connect your wallet');
@@ -41,7 +101,10 @@ const newConsumer = async () => {
 
     const address = prompt('Enter a consumer contract address (starts with ct_)');
 
-    if (!address || !address.startsWith('ct_')) return;
+    if (!address || !address.startsWith('ct_')) {
+        addingConsumer.value = false;
+        return;
+    }
 
     const txHash = await addConsumer(address as `ct_${string}`);
 
@@ -53,6 +116,27 @@ const newConsumer = async () => {
     }
 
     addingConsumer.value = false;
+};
+
+const deleteConsumer = async (address: `ak_${string}`) => {
+    if (!walletStore.address) {
+        toast.warning('Please connect your wallet');
+        return;
+    }
+    if (addingConsumer.value) return;
+
+    removingConsumer.value = address;
+
+    const txHash = await removeConsumer(address);
+
+    if (txHash) {
+        toast.success('Consumer added');
+        fetchOwnerSubscription(walletStore.address, false);
+    } else {
+        toast.error('Consumer creation failed');
+    }
+
+    removingConsumer.value = null;
 };
 
 const newSubscription = async () => {
@@ -96,7 +180,7 @@ watch(walletStore, (store) => {
                 <ProgressBox />
             </div>
 
-            <div class="subscription" v-else-if="userStore.subscription">
+            <div class="subscription" v-else>
                 <div class="table">
                     <div class="name">My subscription</div>
                     <div class="thead">
@@ -127,7 +211,7 @@ watch(walletStore, (store) => {
                             </div>
                             <div class="td">
                                 <div>
-                                    <p>Consumers</p>
+                                    <p>Spent</p>
                                     <InfoIcon />
                                 </div>
                             </div>
@@ -136,6 +220,8 @@ watch(walletStore, (store) => {
                                     <p>Balance</p>
                                 </div>
                             </div>
+                            <div class="td"></div>
+                            <div class="td"></div>
                         </div>
                     </div>
                     <div class="tbody" v-if="userStore.subscription">
@@ -167,12 +253,30 @@ watch(walletStore, (store) => {
                             </div>
                             <div class="td">
                                 <div>
-                                    <p>{{ userStore.subscription.consumers.length }}</p>
+                                    <p>{{ Converter.toMoney(
+                                        Converter.down(new BigNumber(userStore.subscription.spent), 18)
+                                    ) }} Æ</p>
                                 </div>
                             </div>
                             <div class="td">
                                 <div>
-                                    <p>{{ userStore.subscription.balance }} Æ</p>
+                                    <p>{{ Converter.toMoney(
+                                        Converter.down(new BigNumber(userStore.subscription.balance), 18)
+                                    ) }} Æ</p>
+                                </div>
+                            </div>
+                            <div class="td">
+                                <div>
+                                    <button class="topup" @click="topUp">
+                                        {{ toppingUp ? 'Topping up...' : 'Top up' }}
+                                    </button>
+                                </div>
+                            </div>
+                            <div class="td">
+                                <div>
+                                    <button class="withdraw" @click="withdraw">
+                                        {{ withdrawing ? 'Withdrawing...' : 'Withdraw' }}
+                                    </button>
                                 </div>
                             </div>
                         </div>
@@ -185,7 +289,7 @@ watch(walletStore, (store) => {
                     </div>
                 </div>
 
-                <div class="table consumers">
+                <div class="table consumers" v-if="userStore.subscription">
                     <div class="name">Consumers</div>
                     <div class="thead">
                         <div class="tr">
@@ -202,20 +306,16 @@ watch(walletStore, (store) => {
                         <div class="tr" v-for="consumer in userStore.subscription.consumers">
                             <div class="td">
                                 <div>
-                                    <TicketIcon />
-                                    <p>{{ userStore.subscription.id }}</p>
-                                </div>
-                            </div>
-                            <div class="td">
-                                <div>
-                                    <p>{{ Converter.toChecksumAddress(consumer, 8) }}
+                                    <p>{{ Converter.toChecksumAddress(consumer, 16) }}
                                     </p>
                                     <CopyIcon />
                                 </div>
                             </div>
                             <div class="td">
                                 <div>
-                                    <button>Removed</button>
+                                    <button class="remove" @click="deleteConsumer(consumer)">
+                                        {{ removingConsumer == consumer ? 'Removing...' : 'Remove' }}
+                                    </button>
                                 </div>
                             </div>
                         </div>
@@ -226,6 +326,9 @@ watch(walletStore, (store) => {
                         <Button :loading="addingConsumer" @click="newConsumer" :text="'Add consumer'" />
                     </div>
                 </div>
+
+                <Button v-if="userStore.subscription && userStore.subscription.consumers.length > 0"
+                    :loading="addingConsumer" @click="newConsumer" :text="'Add another consumer'" />
             </div>
         </div>
     </section>
@@ -250,13 +353,13 @@ watch(walletStore, (store) => {
 
 .tr {
     display: grid;
-    grid-template-columns: 1fr 1.2fr 2fr 0.6fr 0.8fr 1.5fr;
+    grid-template-columns: 1fr 1.2fr 1.5fr 0.6fr 0.8fr 0.8fr 0.5fr 0.5fr;
     align-items: center;
     height: 50px;
 }
 
 .consumers .tr {
-    grid-template-columns: 3fr 1fr;
+    grid-template-columns: 2fr 1fr;
 }
 
 .thead .td div {
@@ -272,6 +375,21 @@ watch(walletStore, (store) => {
     justify-content: center;
     border: none;
     background: none;
+}
+
+.consumers .remove {
+    color: var(--sm-red);
+    text-decoration: underline;
+}
+
+.topup {
+    color: var(--primary);
+    text-decoration: underline;
+}
+
+.withdraw {
+    color: var(--tx-semi);
+    text-decoration: underline;
 }
 
 .tbody {

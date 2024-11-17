@@ -38,6 +38,18 @@ export const aci = [
                             "int",
                             "int"
                         ]
+                    },
+                    {
+                        "ConsumerAdded": [
+                            "int",
+                            "address"
+                        ]
+                    },
+                    {
+                        "ConsumerRemoved": [
+                            "int",
+                            "address"
+                        ]
                     }
                 ]
             },
@@ -102,6 +114,34 @@ export const aci = [
                         }
                     ],
                     "name": "use_subscription",
+                    "payable": false,
+                    "returns": {
+                        "tuple": []
+                    },
+                    "stateful": true
+                },
+                {
+                    "arguments": [
+                        {
+                            "name": "consumer",
+                            "type": "address"
+                        }
+                    ],
+                    "name": "add_consumer",
+                    "payable": false,
+                    "returns": {
+                        "tuple": []
+                    },
+                    "stateful": true
+                },
+                {
+                    "arguments": [
+                        {
+                            "name": "old_consumer",
+                            "type": "address"
+                        }
+                    ],
+                    "name": "remove_consumer",
                     "payable": false,
                     "returns": {
                         "tuple": []

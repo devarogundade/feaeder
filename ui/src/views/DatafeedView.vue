@@ -9,6 +9,7 @@ import BigNumber from 'bignumber.js';
 import Chart from '@/components/Chart.vue';
 import { format as formatDate } from 'timeago.js';
 import CopyIcon from '@/components/icons/CopyIcon.vue';
+import ProgressBox from '@/components/ProgressBox.vue';
 
 interface ChartData {
     name: string;
@@ -23,9 +24,12 @@ const loadingChartData = ref(true);
 const minData = ref(Number.MAX_VALUE);
 const maxData = ref(0);
 const interval = ref<Interval>('1d');
+const fetchingAggregator = ref(false);
 
 const getAggregator = async () => {
+    fetchingAggregator.value = true;
     aggregator.value = await fetchAggregator(route.params.id.toString());
+    fetchingAggregator.value = false;
     getDatafeeds();
 };
 
@@ -71,7 +75,10 @@ watch(interval, () => {
 <template>
     <section>
         <div class="app_width">
-            <div class="datafeeds" v-if="aggregator && datafeeds.length > 0">
+            <div class="progress" v-if="fetchingAggregator || loadingChartData">
+                <ProgressBox />
+            </div>
+            <div class="datafeeds" v-else-if="aggregator && datafeeds.length > 0">
                 <div class="title">
                     <RouterLink to="/">
                         <h3>Data Feeds</h3>

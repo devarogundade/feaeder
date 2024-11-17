@@ -16,6 +16,7 @@ import CommodityIcon from '@/components/icons/CommodityIcon.vue';
 import RWAIcon from '@/components/icons/RWAIcon.vue';
 import InfoIcon from '@/components/icons/InfoIcon.vue';
 import TicketIcon from '@/components/icons/TicketIcon.vue';
+import ProgressBox from '@/components/ProgressBox.vue';
 
 const total = ref(1);
 const currentPage = ref(1);
@@ -27,6 +28,7 @@ const category = ref<FeedsCategory | null>(null);
 const type = ref(FeedsType.Push);
 const walletStore = useWalletStore();
 const userStore = useUserStore();
+const fetchingAggregators = ref(false);
 
 const selectCategory = (newCategory: string) => {
   if (category.value == newCategory) {
@@ -39,6 +41,8 @@ const selectCategory = (newCategory: string) => {
 };
 
 const getAggregator = async (page: number) => {
+  fetchingAggregators.value = page == 1;
+
   const result = await fetchAggregators(page, category.value);
 
   if (!result || !result.data) {
@@ -50,6 +54,8 @@ const getAggregator = async (page: number) => {
   lastPage.value = result.lastPage;
   aggregators.value = result.data;
   limit.value = result.limit;
+
+  fetchingAggregators.value = false;
 };
 
 const fetchOwnerSubscription = async (owner: `ak_${string}`) => {
@@ -167,7 +173,9 @@ watch(walletStore, (store) => {
               </div>
               <div class="td">
                 <div>
-                  <p>{{ userStore.subscription.balance }} Æ</p>
+                  <p>{{ Converter.toMoney(
+                    Converter.down(new BigNumber(userStore.subscription.balance), 18)
+                  ) }} Æ</p>
                 </div>
               </div>
             </div>
@@ -241,7 +249,10 @@ watch(walletStore, (store) => {
               </div>
             </div>
           </div>
-          <div class="tbody">
+          <div class="progress" v-if="fetchingAggregators">
+            <ProgressBox />
+          </div>
+          <div class="tbody" v-else-if="aggregators.length > 0">
             <div class="tr" v-for="aggregator, index in aggregators" :key="index">
               <div class="td">
                 <RouterLink :to="`/feeds/${aggregator.address}`">
@@ -301,7 +312,7 @@ watch(walletStore, (store) => {
           </div>
         </div>
 
-        <div class="empty" v-show="aggregators.length == 0">
+        <div class="empty" v-show="!fetchingAggregators && aggregators.length == 0">
           <img src="/images/empty.png" alt="Empty data">
           <p>No aggregators found.</p>
         </div>

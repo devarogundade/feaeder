@@ -7,6 +7,7 @@ import { getSubscription, vrfs } from '@/scripts/aeternity';
 import Converter from '@/scripts/converter';
 import { useUserStore } from '@/stores/user';
 import { useWalletStore } from '@/stores/wallet';
+import BigNumber from 'bignumber.js';
 import { onMounted, watch } from 'vue';
 
 const walletStore = useWalletStore();
@@ -115,7 +116,9 @@ watch(walletStore, (store) => {
                             </div>
                             <div class="td">
                                 <div>
-                                    <p>{{ userStore.subscription.balance }} Æ</p>
+                                    <p>{{ Converter.toMoney(
+                                        Converter.down(new BigNumber(userStore.subscription.balance), 18)
+                                    ) }} Æ</p>
                                 </div>
                             </div>
                         </div>
