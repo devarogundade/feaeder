@@ -130,7 +130,7 @@ watch(interval, () => {
                             </div>
 
                             <div class="parameter">
-                                <p>Source</p>
+                                <p>Sources</p>
                                 <div class="images">
                                     <img v-for="source in Object.keys(aggregator.sources)" :key="source"
                                         :src="`/images/${source}.png`" :alt="source">
@@ -273,8 +273,8 @@ watch(interval, () => {
 }
 
 .images img {
-    width: 20px;
-    height: 20px;
+    width: 24px;
+    height: 24px;
 }
 
 .parameter p {
