@@ -1,46 +1,58 @@
 import {
-    AeSdkAepp, CompilerHttp, Node, walletDetector, BrowserWindowMessageConnection, RpcConnectionDenyError,
+    walletDetector,
+    BrowserWindowMessageConnection,
     // @ts-expect-error
-    SUBSCRIPTION_TYPES
+    SUBSCRIPTION_TYPES,
+    WalletConnectorFrame
 } from '@aeternity/aepp-sdk';
+import type AccountRpc from 'node_modules/@aeternity/aepp-sdk/es/account/Rpc';
 
+const AEPP_NAME = 'feaeder';
 
-export function getAeSdk(): AeSdkAepp {
-    const aeSdk = new AeSdkAepp({
-        name: 'Feæder',
-        onCompiler: new CompilerHttp('https://v8.compiler.aepps.com'),
-        nodes: [{ name: 'testnet', instance: new Node('https://testnet.aeternity.io') }]
-    });
+let accounts: AccountRpc[] = [];
 
-    aeSdk.selectNode('testnet');
+export async function getAccounts(): Promise<AccountRpc[]> {
+    if (accounts.length > 0) return accounts;
 
-    return aeSdk;
+    const connection = await scanForWallets();
+
+    const walletConnectorFrame = await WalletConnectorFrame.connect(
+        AEPP_NAME,
+        connection
+    );
+
+    accounts = await walletConnectorFrame.subscribeAccounts(
+        SUBSCRIPTION_TYPES.subscribe,
+        'connected'
+    );
+
+    return accounts;
+}
+
+export async function getAccount(): Promise<AccountRpc | null> {
+    const accounts = await getAccounts();
+    if (accounts.length == 0) return null;
+    return accounts[0];
 }
 
 export async function connectWallet(): Promise<`ak_${string}` | null> {
-    const aeSdk = getAeSdk();
-    const connection = await scanForWallets();
-
     try {
-        await aeSdk.connectToWallet(connection);
+        const accounts = await getAccounts();
+        if (accounts.length == 0) return null;
+        return accounts[0].address;
     } catch (error) {
-        if (error instanceof RpcConnectionDenyError) connection.disconnect();
+        console.log(error);
         return null;
     }
-
-    const { address } = await aeSdk.subscribeAddress(
-        SUBSCRIPTION_TYPES.subscribe, 'connected'
-    );
-
-    return Object.keys(address.current)[0] as `ak_${string}`;
 }
 
 function scanForWallets(): Promise<BrowserWindowMessageConnection> {
     return new Promise((resolve) => {
-        const scannerConnection = new BrowserWindowMessageConnection();
+        const browserConnection = new BrowserWindowMessageConnection();
 
-        const stopScan = walletDetector(scannerConnection, ({ wallets, newWallet }) => {
+        const stopScan = walletDetector(browserConnection, ({ wallets, newWallet }) => {
             stopScan();
+
             newWallet = newWallet || Object.values(wallets)[0];
             resolve(newWallet.getConnection());
         });

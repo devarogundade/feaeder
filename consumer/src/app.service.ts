@@ -110,6 +110,10 @@ export class AppService {
     return { total, lastPage, data, limit: TAKE_SIZE }; // Return paginated result
   }
 
+  async getAggregator(address: string): Promise<Aggregator | null> {
+    return this.aggregatorModel.findOne({ address }).exec();
+  }
+
   // Method to fetch a paginated list of datafeeds
   async getDatafeeds(page: number): Promise<Paged<Datafeed[]>> {
     const total = await this.datafeedModel.countDocuments(); // Total count for pagination
@@ -126,20 +130,55 @@ export class AppService {
     return { total, lastPage, data, limit: TAKE_SIZE }; // Return paginated result
   }
 
+
   // Method to fetch paginated datafeeds associated with a specific aggregator
-  async getAggregatorDatafeeds(aggregator: string, page: number): Promise<Paged<Datafeed[]>> {
-    const total = await this.datafeedModel.countDocuments({ aggregator }); // Total count for pagination
+  async getAggregatorDatafeeds(aggregator: string, page: number, interval: string): Promise<Paged<Datafeed[]>> {
+    // Define interval logic
+    const intervalMap = {
+      '1m': 24 * 60 * 60 * 1000, // 1 day in milliseconds
+      '1w': 7 * 60 * 60 * 1000,  // 7 hours in milliseconds
+      '1d': 1 * 60 * 60 * 1000   // 1 hour in milliseconds
+    };
 
-    // Fetch datafeeds for a specific aggregator with sorting and pagination
-    const data = await this.datafeedModel.find({ aggregator })
-      .limit(TAKE_SIZE * 1)
-      .skip((page - 1) * TAKE_SIZE)
-      .sort({ timestamp: -1 }) // Sort by timestamp in descending order
-      .exec();
+    const bucketSize = intervalMap[interval];
 
-    const lastPage = Math.ceil(total / TAKE_SIZE); // Calculate the last page for pagination
+    const data = await this.datafeedModel.aggregate([
+      { $match: { aggregator } }, // Match specific aggregator
+      {
+        $sort: { timestamp: -1 } // Sort by timestamp descending
+      },
+      {
+        $group: {
+          _id: {
+            $toLong: {
+              $subtract: [
+                { $toLong: "$timestamp" },
+                { $mod: [{ $toLong: "$timestamp" }, bucketSize] }
+              ]
+            }
+          },
+          latestDatafeed: { $first: "$$ROOT" } // Select the latest datafeed in each bucket
+        }
+      },
+      {
+        $replaceRoot: { newRoot: "$latestDatafeed" } // Replace group structure with the latest datafeed
+      },
+      {
+        $sort: { timestamp: -1 } // Sort final data by timestamp descending
+      },
+      {
+        $skip: (page - 1) * bucketSize // Pagination skip
+      },
+      {
+        $limit: bucketSize // Fetch only bucketSize records
+      }
+    ]);
 
-    return { total, lastPage, data, limit: TAKE_SIZE }; // Return paginated result
+    // Total documents count for the pagination
+    const total = await this.datafeedModel.countDocuments({ aggregator });
+    const lastPage = Math.ceil(total / bucketSize);
+
+    return { total, lastPage, data, limit: bucketSize };
   }
 
   async requestVrf(requestId: number, to: `ct_${string}`): Promise<void> {

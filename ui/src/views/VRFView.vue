@@ -1,6 +1,31 @@
 <script setup lang="ts">
 import ArrowRightIcon from '@/components/icons/ArrowRightIcon.vue';
 import CopyIcon from '@/components/icons/CopyIcon.vue';
+import {
+    createSubscription,
+    getSubscription
+} from '@/scripts/aeternity';
+import Converter from '@/scripts/converter';
+import { useWalletStore } from '@/stores/wallet';
+import { onMounted, watch } from 'vue';
+
+const walletStore = useWalletStore();
+
+const fetchOwnerSubscription = async (owner: `ak_${string}`) => {
+    walletStore.setSubscription(await getSubscription(owner));
+};
+
+onMounted(() => {
+    if (walletStore.address) {
+        fetchOwnerSubscription(walletStore.address);
+    }
+});
+
+watch(walletStore, (store) => {
+    if (store.address) {
+        fetchOwnerSubscription(store.address);
+    }
+});
 </script>
 
 <template>
@@ -10,7 +35,11 @@ import CopyIcon from '@/components/icons/CopyIcon.vue';
                 <div class="hero">
                     <h3>Feæder Verifiable Randomness Function</h3>
                     <p>Chainlink VRF provides cryptographically secure randomness for your smart contracts.</p>
-                    <button>Create subscription</button>
+                    <button v-if="!walletStore.subscription" @click="createSubscription">Create subscription</button>
+
+                    <RouterLink to="/subscription" v-else>
+                        <button>Manage subscription</button>
+                    </RouterLink>
                 </div>
 
                 <div class="table">
@@ -54,45 +83,46 @@ import CopyIcon from '@/components/icons/CopyIcon.vue';
                             </div>
                         </div>
                     </div>
-                    <div class="tbody">
-                        <div class="tr" v-for="i in 0">
+                    <div class="tbody" v-if="walletStore.subscription">
+                        <div class="tr">
                             <div class="td">
-                                <RouterLink :to="`/feeds/${i}`">
+                                <RouterLink :to="`/subscriptions/${walletStore.subscription.id}`">
                                     <div>
                                         <img src="/images/ae.png" alt="">
-                                        <p>6395</p>
+                                        <p>{{ walletStore.subscription.id }}</p>
                                     </div>
                                 </RouterLink>
                             </div>
                             <div class="td">
                                 <div>
-                                    <p>ak_ae54...6031</p>
+                                    <p>{{ Converter.toChecksumAddress(walletStore.subscription.creator, 4) }}</p>
                                     <CopyIcon />
                                 </div>
                             </div>
                             <div class="td">
                                 <div>
-                                    <p>November 16, 2024 at 06:46 UTC</p>
+                                    <p>{{ Converter.fullMonth(new Date(Number(walletStore.subscription.timestamp))) }}
+                                    </p>
                                 </div>
                             </div>
                             <div class="td">
                                 <div>
-                                    <p>1.0</p>
+                                    <p>{{ Number(walletStore.subscription.version).toFixed(1) }}</p>
                                 </div>
                             </div>
                             <div class="td">
                                 <div>
-                                    <p>2</p>
+                                    <p>{{ walletStore.subscription.consumers.length }}</p>
                                 </div>
                             </div>
                             <div class="td">
                                 <div>
-                                    <p>1.46 Æ</p>
+                                    <p>{{ walletStore.subscription.balance }} Æ</p>
                                 </div>
                             </div>
                         </div>
                     </div>
-                    <div class="empty">
+                    <div class="empty" v-else>
                         <img src="/images/empty.png" alt="Empty data">
                         <p>No subscription</p>
                     </div>

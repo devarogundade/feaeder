@@ -11,7 +11,7 @@ const Converter = {
         return emailRegex.test(email);
     },
 
-    toChecksumAddress: function (address: `ak_${string}`, space: number = 4) {
+    toChecksumAddress: function (address: string, space: number = 4) {
         return address.substring(0, space + 3) + '...' +
             address.substring(address.length - space, address.length);
     },
@@ -145,7 +145,16 @@ const Converter = {
     },
 
     fullMonth: function (date: Date): string {
-        const options: Intl.DateTimeFormatOptions = { year: 'numeric', month: 'long' };
+        const options: Intl.DateTimeFormatOptions = {
+            year: 'numeric',
+            month: 'long',
+            day: '2-digit',
+            minute: '2-digit',
+            hour: '2-digit',
+            timeZone: 'UTC',
+            timeZoneName: 'short',
+            hour12: false
+        };
         return date.toLocaleString('en-US', options);
     },
 

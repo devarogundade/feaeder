@@ -4,7 +4,9 @@ import CopyIcon from '@/components/icons/CopyIcon.vue';
 import { fetchAggregators } from '@/scripts/consumer';
 import Converter from '@/scripts/converter';
 import { FeedsType, type Aggregator, type FeedsCategory } from '@/types';
-import { onMounted, ref } from 'vue';
+import { onMounted, ref, watch } from 'vue';
+import { useWalletStore } from '@/stores/wallet';
+import { getSubscription } from '@/scripts/aeternity';
 import { useToast } from 'vue-toast-notification';
 import 'vue-toast-notification/dist/theme-sugar.css';
 import BigNumber from 'bignumber.js';
@@ -17,6 +19,7 @@ const aggregators = ref<Aggregator[]>([]);
 const toast = useToast({ duration: 4000, position: 'top', dismissible: true });
 const category = ref<FeedsCategory | null>(null);
 const type = ref(FeedsType.Push);
+const walletStore = useWalletStore();
 
 const selectCategory = (newCategory: string) => {
   if (category.value == newCategory) {
@@ -42,6 +45,10 @@ const getAggregator = async (page: number) => {
   limit.value = result.limit;
 };
 
+const fetchOwnerSubscription = async (owner: `ak_${string}`) => {
+  walletStore.setSubscription(await getSubscription(owner));
+};
+
 const copyText = (text: string) => {
   navigator.clipboard.writeText(text);
   toast.success(text);
@@ -49,6 +56,16 @@ const copyText = (text: string) => {
 
 onMounted(() => {
   getAggregator(currentPage.value);
+
+  if (walletStore.address) {
+    fetchOwnerSubscription(walletStore.address);
+  }
+});
+
+watch(walletStore, (store) => {
+  if (store.address) {
+    fetchOwnerSubscription(store.address);
+  }
 });
 </script>
 
@@ -109,50 +126,50 @@ onMounted(() => {
               </div>
             </div>
           </div>
-          <div class="tbody">
-            <div class="tr" v-for="i in 0">
+          <div class="tbody" v-if="walletStore.subscription">
+            <div class="tr">
               <div class="td">
-                <RouterLink :to="`/feeds/${i}`">
+                <RouterLink :to="`/subscriptions/${walletStore.subscription.id}`">
                   <div>
                     <img src="/images/ae.png" alt="">
-                    <p>6395</p>
+                    <p>{{ walletStore.subscription.id }}</p>
                   </div>
                 </RouterLink>
               </div>
               <div class="td">
                 <div>
-                  <p>ak_ae54...6031</p>
+                  <p>{{ Converter.toChecksumAddress(walletStore.subscription.creator, 4) }}</p>
                   <CopyIcon />
                 </div>
               </div>
               <div class="td">
                 <div>
-                  <p>November 16, 2024 at 06:46 UTC</p>
+                  <p>{{ Converter.fullMonth(new Date(Number(walletStore.subscription.timestamp))) }}
+                  </p>
                 </div>
               </div>
               <div class="td">
                 <div>
-                  <p>1.0</p>
+                  <p>{{ Number(walletStore.subscription.version).toFixed(1) }}</p>
                 </div>
               </div>
               <div class="td">
                 <div>
-                  <p>2</p>
+                  <p>{{ walletStore.subscription.consumers.length }}</p>
                 </div>
               </div>
               <div class="td">
                 <div>
-                  <p>1.46 Æ</p>
+                  <p>{{ walletStore.subscription.balance }} Æ</p>
                 </div>
               </div>
             </div>
           </div>
-          <div class="empty">
+          <div class="empty" v-else>
             <img src="/images/empty.png" alt="Empty data">
             <p>No subscription</p>
           </div>
         </div>
-
 
         <div class="filters">
           <button :class="category == 'crypto' ? 'filter filter_active' : 'filter'" @click="selectCategory('crypto')">
