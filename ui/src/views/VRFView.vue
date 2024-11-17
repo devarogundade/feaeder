@@ -1,6 +1,8 @@
 <script setup lang="ts">
 import ArrowRightIcon from '@/components/icons/ArrowRightIcon.vue';
 import CopyIcon from '@/components/icons/CopyIcon.vue';
+import InfoIcon from '@/components/icons/InfoIcon.vue';
+import TicketIcon from '@/components/icons/TicketIcon.vue';
 import { getSubscription, vrfs } from '@/scripts/aeternity';
 import Converter from '@/scripts/converter';
 import { useUserStore } from '@/stores/user';
@@ -45,31 +47,31 @@ watch(walletStore, (store) => {
                             <div class="td">
                                 <div>
                                     <p>ID</p>
-                                    <ArrowRightIcon />
+                                    <InfoIcon />
                                 </div>
                             </div>
                             <div class="td">
                                 <div>
                                     <p>Creator</p>
-                                    <ArrowRightIcon />
+                                    <InfoIcon />
                                 </div>
                             </div>
                             <div class="td">
                                 <div>
                                     <p>Created</p>
-                                    <ArrowRightIcon />
+                                    <InfoIcon />
                                 </div>
                             </div>
                             <div class="td">
                                 <div>
                                     <p>Version</p>
-                                    <ArrowRightIcon />
+                                    <InfoIcon />
                                 </div>
                             </div>
                             <div class="td">
                                 <div>
                                     <p>Consumers</p>
-                                    <ArrowRightIcon />
+                                    <InfoIcon />
                                 </div>
                             </div>
                             <div class="td">
@@ -82,9 +84,9 @@ watch(walletStore, (store) => {
                     <div class="tbody" v-if="userStore.subscription">
                         <div class="tr">
                             <div class="td">
-                                <RouterLink :to="`/subscriptions/${userStore.subscription.id}`">
+                                <RouterLink :to="`/subscription`">
                                     <div>
-                                        <img src="/images/ae.png" alt="">
+                                        <TicketIcon />
                                         <p>{{ userStore.subscription.id }}</p>
                                     </div>
                                 </RouterLink>
@@ -131,19 +133,19 @@ watch(walletStore, (store) => {
                             <div class="td">
                                 <div>
                                     <p>ID</p>
-                                    <ArrowRightIcon />
+                                    <InfoIcon />
                                 </div>
                             </div>
                             <div class="td">
                                 <div>
                                     <p>Address</p>
-                                    <ArrowRightIcon />
+                                    <InfoIcon />
                                 </div>
                             </div>
                             <div class="td">
                                 <div>
                                     <p>Version</p>
-                                    <ArrowRightIcon />
+                                    <InfoIcon />
                                 </div>
                             </div>
                             <div class="td">
@@ -245,6 +247,11 @@ section {
     grid-template-columns: 1fr 1.2fr 2fr 0.6fr 0.8fr 1.5fr;
     align-items: center;
     height: 50px;
+}
+
+.tr svg {
+    width: 16px;
+    height: 16px;
 }
 
 .vrfs .tr {

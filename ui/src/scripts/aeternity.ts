@@ -44,6 +44,44 @@ export async function createSubscription(): Promise<`th_${string}` | null> {
     }
 }
 
+export async function addConsumer(consumer: `ct_${string}`): Promise<`th_${string}` | null> {
+    try {
+        const aeSdk = await getAeSdk();
+
+        const contract = await Contract.initialize({
+            ...aeSdk.getContext(), aci: feaederAci, address: feaederId
+        });
+
+        const receipt = await contract.$call('add_consumer', [consumer.replace('ct', 'ak')], {
+            omitUnknown: true
+        });
+
+        return receipt.hash;
+    } catch (error) {
+        console.log(error);
+        return null;
+    }
+}
+
+export async function removeConsumer(consumer: `ct_${string}`): Promise<`th_${string}` | null> {
+    try {
+        const aeSdk = await getAeSdk();
+
+        const contract = await Contract.initialize({
+            ...aeSdk.getContext(), aci: feaederAci, address: feaederId
+        });
+
+        const receipt = await contract.$call('remove_consumer', [consumer.replace('ct', 'ak')], {
+            omitUnknown: true
+        });
+
+        return receipt.hash;
+    } catch (error) {
+        console.log(error);
+        return null;
+    }
+}
+
 export async function getSubscription(owner: `ak_${string}`): Promise<Subscription | null> {
     try {
         const aeSdk = await getAeSdk();

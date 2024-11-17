@@ -1,5 +1,4 @@
 <script setup lang="ts">
-import ArrowRightIcon from '@/components/icons/ArrowRightIcon.vue';
 import CopyIcon from '@/components/icons/CopyIcon.vue';
 import { fetchAggregators } from '@/scripts/consumer';
 import Converter from '@/scripts/converter';
@@ -11,6 +10,12 @@ import { useToast } from 'vue-toast-notification';
 import 'vue-toast-notification/dist/theme-sugar.css';
 import BigNumber from 'bignumber.js';
 import { useUserStore } from '@/stores/user';
+import CoinIcon from '@/components/icons/CoinIcon.vue';
+import FiatIcon from '@/components/icons/FiatIcon.vue';
+import CommodityIcon from '@/components/icons/CommodityIcon.vue';
+import RWAIcon from '@/components/icons/RWAIcon.vue';
+import InfoIcon from '@/components/icons/InfoIcon.vue';
+import TicketIcon from '@/components/icons/TicketIcon.vue';
 
 const total = ref(1);
 const currentPage = ref(1);
@@ -94,31 +99,31 @@ watch(walletStore, (store) => {
               <div class="td">
                 <div>
                   <p>ID</p>
-                  <ArrowRightIcon />
+                  <InfoIcon />
                 </div>
               </div>
               <div class="td">
                 <div>
                   <p>Creator</p>
-                  <ArrowRightIcon />
+                  <InfoIcon />
                 </div>
               </div>
               <div class="td">
                 <div>
                   <p>Created</p>
-                  <ArrowRightIcon />
+                  <InfoIcon />
                 </div>
               </div>
               <div class="td">
                 <div>
                   <p>Version</p>
-                  <ArrowRightIcon />
+                  <InfoIcon />
                 </div>
               </div>
               <div class="td">
                 <div>
                   <p>Consumers</p>
-                  <ArrowRightIcon />
+                  <InfoIcon />
                 </div>
               </div>
               <div class="td">
@@ -131,9 +136,9 @@ watch(walletStore, (store) => {
           <div class="tbody" v-if="userStore.subscription">
             <div class="tr">
               <div class="td">
-                <RouterLink :to="`/subscriptions/${userStore.subscription.id}`">
+                <RouterLink :to="`/subscription`">
                   <div>
-                    <img src="/images/ae.png" alt="">
+                    <TicketIcon />
                     <p>{{ userStore.subscription.id }}</p>
                   </div>
                 </RouterLink>
@@ -175,23 +180,23 @@ watch(walletStore, (store) => {
 
         <div class="filters">
           <button :class="category == 'crypto' ? 'filter filter_active' : 'filter'" @click="selectCategory('crypto')">
-            <ArrowRightIcon />
+            <CoinIcon />
             <p>Cryptocurrencies</p>
           </button>
 
           <button :class="category == 'fiat' ? 'filter filter_active' : 'filter'" @click="selectCategory('fiat')">
-            <ArrowRightIcon />
+            <FiatIcon />
             <p>Fiat</p>
           </button>
 
           <button :class="category == 'commodity' ? 'filter filter_active' : 'filter'"
             @click="selectCategory('commodity')">
-            <ArrowRightIcon />
+            <CommodityIcon />
             <p>Commodities</p>
           </button>
 
           <button :class="category == 'rwa' ? 'filter filter_active' : 'filter'" @click="selectCategory('rwa')">
-            <ArrowRightIcon />
+            <RWAIcon />
             <p>RWA</p>
           </button>
         </div>
@@ -202,31 +207,31 @@ watch(walletStore, (store) => {
               <div class="td">
                 <div>
                   <p>Feed</p>
-                  <ArrowRightIcon />
+                  <InfoIcon />
                 </div>
               </div>
               <div class="td">
                 <div>
                   <p>Pulse</p>
-                  <ArrowRightIcon />
+                  <InfoIcon />
                 </div>
               </div>
               <div class="td">
                 <div>
                   <p>Latest Answer</p>
-                  <ArrowRightIcon />
+                  <InfoIcon />
                 </div>
               </div>
               <div class="td">
                 <div>
                   <p>Deviation threshold</p>
-                  <ArrowRightIcon />
+                  <InfoIcon />
                 </div>
               </div>
               <div class="td">
                 <div>
                   <p>Heartbeat</p>
-                  <ArrowRightIcon />
+                  <InfoIcon />
                 </div>
               </div>
               <div class="td">
@@ -282,7 +287,6 @@ watch(walletStore, (store) => {
               </div>
               <div class="td">
                 <div>
-                  <ArrowRightIcon />
                   <p>{{ aggregator.category }}</p>
                 </div>
               </div>
@@ -359,6 +363,11 @@ section {
   font-weight: 400;
   color: var(--tx-semi);
   background: #FFF;
+}
+
+.filter svg {
+  width: 18px;
+  height: 18px;
 }
 
 .filter_active {
@@ -452,11 +461,17 @@ section {
   height: 60px;
 }
 
+.tr svg {
+  width: 16px;
+  height: 16px;
+}
+
 .tbody .td div {
   display: flex;
   align-items: center;
   gap: 10px;
   padding: 0 16px;
+  text-transform: capitalize;
 }
 
 .tbody .td img,

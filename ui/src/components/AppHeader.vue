@@ -1,19 +1,24 @@
 <script setup lang="ts">
 import EnthroLogo from '@/components/icons/EnthroLogo.vue';
-import ArrowRightIcon from './icons/ArrowRightIcon.vue';
-import DiscoverIcon from './icons/DiscoverIcon.vue';
 import { useRoute } from 'vue-router';
 import { connectWallet } from '@/scripts/connect';
 import { useWalletStore } from '@/stores/wallet';
 import Converter from '@/scripts/converter';
 import { useToast } from 'vue-toast-notification';
 import 'vue-toast-notification/dist/theme-sugar.css';
+import SearchIcon from './icons/SearchIcon.vue';
+import DocsIcon from './icons/DocsIcon.vue';
+import Button from './Button.vue';
+import { ref } from 'vue';
 
 const route = useRoute();
 const walletStore = useWalletStore();
 const toast = useToast({ duration: 4000, position: 'top', dismissible: true });
+const connectingWallet = ref(false);
 
 const connect = async () => {
+    connectingWallet.value = true;
+
     const address = await connectWallet();
 
     if (address) {
@@ -21,6 +26,8 @@ const connect = async () => {
     } else {
         toast.error('Error: Wallet connection failed.');
     }
+
+    connectingWallet.value = false;
 };
 </script>
 
@@ -34,7 +41,6 @@ const connect = async () => {
                         <RouterLink to="/">
                             <button :class="route.name == 'datafeeds' ? 'tab tab_active' : 'tab'">
                                 <p>Data Feeds</p>
-                                <ArrowRightIcon />
                             </button>
                         </RouterLink>
                         <RouterLink to="/vrf">
@@ -51,22 +57,19 @@ const connect = async () => {
 
                     <div class="actions">
                         <div class="search_bar">
-                            <ArrowRightIcon />
+                            <SearchIcon />
                             <input type="text" placeholder="Search data feeds" />
                         </div>
 
                         <a href="https://docs.feaeder.xyz" target="_blank">
                             <button class="docs">
-                                <DiscoverIcon :color="'var(--tx-semi)'" />
+                                <DocsIcon />
                             </button>
                         </a>
 
-                        <button class="connect_wallet" @click="connect">
-                            {{ walletStore.address ?
-                                Converter.toChecksumAddress(walletStore.address) :
-                                'Connect wallet'
-                            }}
-                        </button>
+                        <Button :loading="connectingWallet" @click="connect" :text="walletStore.address ?
+                            Converter.toChecksumAddress(walletStore.address) :
+                            'Connect wallet'" />
                     </div>
                 </div>
             </header>
@@ -182,16 +185,5 @@ header {
     display: flex;
     align-items: center;
     justify-content: center;
-}
-
-.connect_wallet {
-    padding: 0 16px;
-    border-radius: 4px;
-    background: var(--primary);
-    color: var(--bg);
-    border: none;
-    height: 40px;
-    font-size: 14px;
-    font-weight: 500;
 }
 </style>

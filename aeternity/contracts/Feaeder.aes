@@ -26,7 +26,9 @@ contract Feaeder =
     SubscriptonCreated(address, int) |
     SubscriptonTopup(int, int) |
     SubscriptonWithdrawn(int, int) |
-    SubscriptonUsed(int, int)
+    SubscriptonUsed(int, int) |
+    ConsumerAdded(int, address) |
+    ConsumerRemoved(int, address)
 
   stateful entrypoint init(version: int) = { controller = Call.caller
                                            , subscriptions = {}
@@ -100,6 +102,7 @@ contract Feaeder =
 
     let subscription = state.subscriptions[subscription_id]
 
+    require(List.contains(consumer, subscription.consumers), "UNAUTHORIZED")
     require(subscription.balance >= cost, "INSUFFICIENT_BALANCE")
 
     put(state { subscriptions[subscription_id].balance =
@@ -111,6 +114,39 @@ contract Feaeder =
               })
 
     Chain.event(SubscriptonUsed(subscription_id, cost))
+
+  stateful entrypoint add_consumer(consumer: address) =
+    let sender = Call.caller
+
+    require(Map.member(sender, state.subscription_owners), "NO_SUBSCRIPTION")
+    
+    let subscription_id = state.subscription_owners[sender]
+    let subscription = state.subscriptions[subscription_id]
+
+    let consumers = List.insert_at(0, consumer, subscription.consumers)
+    
+    put(state{ subscriptions[subscription_id].consumers = consumers
+            })
+
+    Chain.event(ConsumerAdded(subscription_id, consumer))
+
+  stateful entrypoint remove_consumer(old_consumer: address) =
+    let sender = Call.caller
+
+    require(Map.member(sender, state.subscription_owners), "NO_SUBSCRIPTION")
+    
+    let subscription_id = state.subscription_owners[sender]
+    let subscription = state.subscriptions[subscription_id]
+
+    let consumers = List.filter(
+      (consumer) => old_consumer != consumer, 
+      subscription.consumers
+      )
+    
+    put(state{ subscriptions[subscription_id].consumers = consumers
+            })
+
+    Chain.event(ConsumerRemoved(subscription_id, old_consumer))
 
   stateful entrypoint add_allowed_contract(new_allowed_contract: address) =
     require_controller()
