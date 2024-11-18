@@ -88,7 +88,7 @@ watch(walletStore, (store) => {
       <div class="datafeeds">
         <div class="hero">
           <h3>Feæder Oracle Data Feeds</h3>
-          <p>Battle-tested infrastructure for highly secure and reliable market-representative data.</p>
+          <p>Robust infrastructure designed for secure and reliable delivery of market-representative data.</p>
         </div>
 
         <div class="types">
@@ -274,7 +274,6 @@ watch(walletStore, (store) => {
                     {{ aggregator.name.endsWith('ETH') ? 'Ξ' : '' }}
                     {{ aggregator.name.endsWith('BTC') ? '₿' : '' }}
                     {{ aggregator.name.endsWith('EUR') ? '€' : '' }}
-
                     {{
                       Converter.toMoney(
                         Converter.down(

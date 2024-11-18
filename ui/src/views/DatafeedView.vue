@@ -25,10 +25,24 @@ const minData = ref(Number.MAX_VALUE);
 const maxData = ref(0);
 const interval = ref<Interval>('1d');
 const fetchingAggregator = ref(false);
+const symbol= ref('');
+const notFound= ref(false);
 
 const getAggregator = async () => {
     fetchingAggregator.value = true;
+
     aggregator.value = await fetchAggregator(route.params.id.toString());
+
+    if (!aggregator.value) {
+        notFound.value = true;
+        return
+    }
+
+    if (aggregator.value.name.endsWith('USD')) symbol.value = '$'
+    if (aggregator.value.name.endsWith('ETH')) symbol.value = 'Ξ'
+    if (aggregator.value.name.endsWith('BTC')) symbol.value = '₿'
+    if (aggregator.value.name.endsWith('EUR')) symbol.value = '€'
+
     fetchingAggregator.value = false;
     getDatafeeds();
 };
@@ -105,7 +119,9 @@ watch(interval, () => {
                     <div class="parameters">
                         <div class="parameter">
                             <p>Latest Answer</p>
-                            <h3>{{ Converter.toMoney(
+                            <h3>
+                            {{ symbol }}
+                            {{ Converter.toMoney(
                                 Converter.down(
                                     Converter.getAverage(datafeeds[0].answers.map(a => new BigNumber(a))),
                                     aggregator.decimals
@@ -166,7 +182,7 @@ watch(interval, () => {
                         <Chart :data="chartData" :domain="[
                             minData - (0.02 * minData),
                             maxData + (0.02 * maxData)
-                        ]" :marker="true" />
+                        ]" :marker="true" :symbol="symbol" />
                     </div>
                 </div>
             </div>

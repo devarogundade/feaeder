@@ -7,7 +7,8 @@ import type { Direction, ChartAxis } from 'vue3-charts/src/types';
 const props = defineProps({
     data: { type: Object },
     marker: { type: Boolean },
-    domain: { required: true }
+    domain: { required: true },
+    symbol: {type: String}
 });
 
 const direction = ref<Direction>('horizontal');
@@ -26,7 +27,7 @@ const axis = ref<ChartAxis>({
         domain: props.domain as any,
         type: 'linear',
         ticks: 8,
-        format: (value) => `$${Converter.toMoney(value)}`
+        format: (value) => `${props.symbol}${Converter.toMoney(value)}`
     }
 })
 
