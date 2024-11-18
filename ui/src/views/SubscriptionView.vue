@@ -11,6 +11,7 @@ import Button from '@/components/Button.vue';
 import TicketIcon from '@/components/icons/TicketIcon.vue';
 import InfoIcon from '@/components/icons/InfoIcon.vue';
 import BigNumber from 'bignumber.js';
+import ToolTip from '@/components/ToolTip.vue';
 
 const walletStore = useWalletStore();
 const userStore = useUserStore();
@@ -188,31 +189,35 @@ watch(walletStore, (store) => {
                             <div class="td">
                                 <div>
                                     <p>ID</p>
-                                    <InfoIcon />
+                                    <ToolTip :tooltip-text="'Identifier.'">
+                                        <InfoIcon />
+                                    </ToolTip>
                                 </div>
                             </div>
                             <div class="td">
                                 <div>
                                     <p>Creator</p>
-                                    <InfoIcon />
                                 </div>
                             </div>
                             <div class="td">
                                 <div>
-                                    <p>Created</p>
-                                    <InfoIcon />
+                                    <p>Created at</p>
                                 </div>
                             </div>
                             <div class="td">
                                 <div>
                                     <p>Version</p>
-                                    <InfoIcon />
+                                    <ToolTip :tooltip-text="'Subscription contract version.'">
+                                        <InfoIcon />
+                                    </ToolTip>
                                 </div>
                             </div>
                             <div class="td">
                                 <div>
                                     <p>Spent</p>
-                                    <InfoIcon />
+                                    <ToolTip :tooltip-text="'Amount used from subscription.'">
+                                        <InfoIcon />
+                                    </ToolTip>
                                 </div>
                             </div>
                             <div class="td">

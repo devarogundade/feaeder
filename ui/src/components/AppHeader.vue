@@ -10,6 +10,7 @@ import SearchIcon from './icons/SearchIcon.vue';
 import DocsIcon from './icons/DocsIcon.vue';
 import Button from './Button.vue';
 import { ref } from 'vue';
+import ToolTip from './ToolTip.vue';
 
 const route = useRoute();
 const walletStore = useWalletStore();
@@ -61,11 +62,13 @@ const connect = async () => {
                             <input type="text" placeholder="Search data feeds" />
                         </div>
 
-                        <a href="https://docs.feaeder.xyz" target="_blank">
-                            <button class="docs">
-                                <DocsIcon />
-                            </button>
-                        </a>
+                        <ToolTip :tooltip-text="'Documentation'" :position="'left'">
+                            <a href="https://docs.feaeder.xyz" target="_blank">
+                                <button class="docs">
+                                    <DocsIcon />
+                                </button>
+                            </a>
+                        </ToolTip>
 
                         <Button v-if="!walletStore.address" :loading="connectingWallet" @click="connect"
                             :text="'Connect wallet'" />

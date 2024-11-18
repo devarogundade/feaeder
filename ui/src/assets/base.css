@@ -35,5 +35,7 @@
   --bg-darker: rgb(235, 235, 235);
   --bg-dark: rgb(245, 245, 245);
 
+  --tooltip-bg: #fffef6;
+
   --sm-red: #F06979;
 }

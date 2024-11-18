@@ -17,6 +17,7 @@ import RWAIcon from '@/components/icons/RWAIcon.vue';
 import InfoIcon from '@/components/icons/InfoIcon.vue';
 import TicketIcon from '@/components/icons/TicketIcon.vue';
 import ProgressBox from '@/components/ProgressBox.vue';
+import ToolTip from '@/components/ToolTip.vue';
 
 const total = ref(1);
 const currentPage = ref(1);
@@ -105,31 +106,35 @@ watch(walletStore, (store) => {
               <div class="td">
                 <div>
                   <p>ID</p>
-                  <InfoIcon />
+                  <ToolTip :tooltip-text="'Identifier.'">
+                    <InfoIcon />
+                  </ToolTip>
                 </div>
               </div>
               <div class="td">
                 <div>
                   <p>Creator</p>
-                  <InfoIcon />
                 </div>
               </div>
               <div class="td">
                 <div>
-                  <p>Created</p>
-                  <InfoIcon />
+                  <p>Created at</p>
                 </div>
               </div>
               <div class="td">
                 <div>
                   <p>Version</p>
-                  <InfoIcon />
+                  <ToolTip :tooltip-text="'Subscription contract version.'">
+                    <InfoIcon />
+                  </ToolTip>
                 </div>
               </div>
               <div class="td">
                 <div>
                   <p>Consumers</p>
-                  <InfoIcon />
+                  <ToolTip :tooltip-text="'Number of added consumer contracts.'">
+                    <InfoIcon />
+                  </ToolTip>
                 </div>
               </div>
               <div class="td">
@@ -215,31 +220,37 @@ watch(walletStore, (store) => {
               <div class="td">
                 <div>
                   <p>Feed</p>
-                  <InfoIcon />
                 </div>
               </div>
               <div class="td">
                 <div>
                   <p>Pulse</p>
-                  <InfoIcon />
+                  <ToolTip :tooltip-text="'Interval between updates.'">
+                    <InfoIcon />
+                  </ToolTip>
                 </div>
               </div>
               <div class="td">
                 <div>
                   <p>Latest Answer</p>
-                  <InfoIcon />
                 </div>
               </div>
               <div class="td">
                 <div>
                   <p>Deviation threshold</p>
-                  <InfoIcon />
+                  <ToolTip
+                    :tooltip-text="'The answer updates when a node identifies that the off-chain values deviate by more than the defined deviation threshold from the onchain value.'">
+                    <InfoIcon />
+                  </ToolTip>
                 </div>
               </div>
               <div class="td">
                 <div>
                   <p>Heartbeat</p>
-                  <InfoIcon />
+                  <ToolTip
+                    :tooltip-text="'A countdown timer that updates the price on-chain when it reaches 00:00. It is a backup in the event that the deviation threshold does not trigger an update over the length of the heartbeat.'">
+                    <InfoIcon />
+                  </ToolTip>
                 </div>
               </div>
               <div class="td">

@@ -3,6 +3,7 @@ import ArrowRightIcon from '@/components/icons/ArrowRightIcon.vue';
 import CopyIcon from '@/components/icons/CopyIcon.vue';
 import InfoIcon from '@/components/icons/InfoIcon.vue';
 import TicketIcon from '@/components/icons/TicketIcon.vue';
+import ToolTip from '@/components/ToolTip.vue';
 import { getSubscription, vrfs } from '@/scripts/aeternity';
 import Converter from '@/scripts/converter';
 import { useUserStore } from '@/stores/user';
@@ -48,31 +49,35 @@ watch(walletStore, (store) => {
                             <div class="td">
                                 <div>
                                     <p>ID</p>
-                                    <InfoIcon />
+                                    <ToolTip :tooltip-text="'Identifier.'">
+                                        <InfoIcon />
+                                    </ToolTip>
                                 </div>
                             </div>
                             <div class="td">
                                 <div>
                                     <p>Creator</p>
-                                    <InfoIcon />
                                 </div>
                             </div>
                             <div class="td">
                                 <div>
-                                    <p>Created</p>
-                                    <InfoIcon />
+                                    <p>Created at</p>
                                 </div>
                             </div>
                             <div class="td">
                                 <div>
                                     <p>Version</p>
-                                    <InfoIcon />
+                                    <ToolTip :tooltip-text="'Subscription contract version.'">
+                                        <InfoIcon />
+                                    </ToolTip>
                                 </div>
                             </div>
                             <div class="td">
                                 <div>
                                     <p>Consumers</p>
-                                    <InfoIcon />
+                                    <ToolTip :tooltip-text="'Number of added consumer contracts.'">
+                                        <InfoIcon />
+                                    </ToolTip>
                                 </div>
                             </div>
                             <div class="td">
@@ -135,25 +140,31 @@ watch(walletStore, (store) => {
                         <div class="tr">
                             <div class="td">
                                 <div>
-                                    <p>ID</p>
-                                    <InfoIcon />
+                                    <p>Type</p>
+                                    <ToolTip :tooltip-text="'VRF contract type.'">
+                                        <InfoIcon />
+                                    </ToolTip>
                                 </div>
                             </div>
                             <div class="td">
                                 <div>
-                                    <p>Address</p>
-                                    <InfoIcon />
+                                    <p>Contract address</p>
                                 </div>
                             </div>
                             <div class="td">
                                 <div>
                                     <p>Version</p>
-                                    <InfoIcon />
+                                    <ToolTip :tooltip-text="'VRF contract version.'">
+                                        <InfoIcon />
+                                    </ToolTip>
                                 </div>
                             </div>
                             <div class="td">
                                 <div>
                                     <p>Query Fee</p>
+                                    <ToolTip :tooltip-text="'The cost of using VRF contract per request.'">
+                                        <InfoIcon />
+                                    </ToolTip>
                                 </div>
                             </div>
                         </div>
@@ -161,12 +172,10 @@ watch(walletStore, (store) => {
                     <div class="tbody">
                         <div class="tr" v-for="vrf in vrfs">
                             <div class="td">
-                                <RouterLink :to="`/vrfs/${vrf.address}`">
-                                    <div>
-                                        <img src="/images/ae.png" alt="">
-                                        <p>{{ vrf.name }}</p>
-                                    </div>
-                                </RouterLink>
+                                <div>
+                                    <img src="/images/ae.png" alt="">
+                                    <p>{{ vrf.name }}</p>
+                                </div>
                             </div>
                             <div class="td">
                                 <div>

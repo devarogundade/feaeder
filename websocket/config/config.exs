@@ -5,5 +5,8 @@ config :websocket, :default_settings, %{
   aggregators: [
     "ct_284BS8M4mWXTji2HRYHkMjzx4dLzLqoqZeDA3KYsEf5djvUkEi",
   ],
-  vrf: ""
+  vrfs: [
+    "",
+    ""
+  ]
 }

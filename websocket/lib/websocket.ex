@@ -79,7 +79,6 @@ defmodule Websocket do
               case log do
                 [%{"topics" => [_ | [current_query_index]]} | _] ->
                   process_query_index(current_query_index, state)
-
                 _ ->
                   :ok
               end
