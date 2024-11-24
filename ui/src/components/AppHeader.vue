@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import EnthroLogo from '@/components/icons/EnthroLogo.vue';
+import FeaederLogo from '@/components/icons/FeaederLogo.vue';
 import { useRoute } from 'vue-router';
 import { connectWallet } from '@/scripts/connect';
 import { useWalletStore } from '@/stores/wallet';
@@ -37,7 +37,7 @@ const connect = async () => {
     <section>
         <div class="app_width">
             <header>
-                <EnthroLogo />
+                <FeaederLogo />
                 <div class="contents">
                     <nav class="tabs">
                         <RouterLink to="/">
