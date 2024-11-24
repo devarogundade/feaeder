@@ -18,10 +18,24 @@ export type Paged<T> = {
 
 export interface DataSource {
     id: string;
-    fetchData: (tickers: string[], decimals: number) => Promise<BigNumber>;
+    fetchData: (args: string[], decimals: number) => Promise<BigNumber>;
 }
 
 export interface VRFJobData {
-    requestId: string,
+    requestId: number;
     to: `ct_${string}`;
+}
+
+export interface AggregatorJobData {
+    address: `ct_${string}`;
+    queryId: string;
+    question: AggregatorQuestion;
+}
+
+export enum AggregatorQuestionType {
+    PRICE
+}
+
+export interface AggregatorQuestion {
+    type: AggregatorQuestionType;
 }

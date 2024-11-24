@@ -289,8 +289,7 @@ payable contract Aggregator =
      * @param answers List of answers to process.
      */
     stateful entrypoint respond( query : oracle_query(string, string)
-                               , answers : list(int)
-                               ) =
+                               , answers : list(int) ) =
         require_relayer()
 
         let answer : option(int) = average_if_within_tolerance(answers)

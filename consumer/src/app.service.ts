@@ -8,7 +8,7 @@ import { Injectable } from '@nestjs/common';
 import { Aggregator } from './database/schemas/aggregator';
 import { Datafeed } from './database/schemas/datafeed';
 import { InjectQueue } from '@nestjs/bullmq';
-import { Paged, VRFJobData } from './types';
+import { AggregatorJobData, Paged, VRFJobData } from './types';
 
 // Define constants for pagination and job scheduling intervals
 const TAKE_SIZE: number = 10; // Number of records to fetch per page
@@ -182,27 +182,25 @@ export class AppService {
   }
 
   async requestVRF(jobData: VRFJobData): Promise<void> {
+    const jobId = `vrf-job-${jobData.requestId}`;
+
     const jobOptions: JobsOptions = {
-      jobId: jobData.requestId // Unique job ID to avoid duplicate jobs
+      jobId // Unique job ID to avoid duplicate jobs
     };
 
-    this.vrfQueue.add(jobData.requestId, jobData,
+    this.vrfQueue.add(jobId, jobData,
       jobOptions
     );
   }
 
-  async requestAggregator(queryId: string, question: string, to: `ct_${string}`): Promise<void> {
+  async requestAggregator(jobData: AggregatorJobData): Promise<void> {
+    const jobId = `aggregator-job-${jobData.queryId}`;
+
     const jobOptions: JobsOptions = {
-      jobId: queryId // Unique job ID to avoid duplicate jobs
+      jobId// Unique job ID to avoid duplicate jobs
     };
 
-    const jobData = {
-      queryId,
-      question,
-      to
-    };
-
-    this.aggregatorRequestQueue.add(queryId, jobData,
+    this.aggregatorRequestQueue.add(jobId, jobData,
       jobOptions
     );
   }

@@ -55,40 +55,34 @@ export class ConsumerWorker extends WorkerHost {
 
     // Fetches price data from external sources like CoinMarketCap and CoinGecko
     private async fetchAnswers(aggregator: Aggregator): Promise<FetchedAnswer> {
-        try {
-            // Collecting sources to fetch data from based on the aggregator's tickers
-            const sources = [];
+        // Collecting sources to fetch data from based on the aggregator's tickers
+        const sources = [];
 
-            // If CoinMarketCap data is available for the aggregator, fetch the data
-            if (aggregator.sources[this.cmc.id]) {
-                sources.push(
-                    this.cmc.fetchData(aggregator.sources[this.cmc.id], aggregator.decimals)
-                );
-            }
-
-            // If CoinGecko data is available for the aggregator, fetch the data
-            if (aggregator.sources[this.coinGecko.id]) {
-                sources.push(
-                    this.coinGecko.fetchData(aggregator.sources[this.coinGecko.id], aggregator.decimals)
-                );
-            }
-
-            // If Chainlink data is available for the aggregator, fetch the data
-            if (aggregator.sources[this.chainlink.id]) {
-                sources.push(
-                    this.chainlink.fetchData(aggregator.sources[this.chainlink.id], aggregator.decimals)
-                );
-            }
-
-            // Wait for all the sources to return data and package them with timestamp
-            const answers = await Promise.all(sources);
-
-            return { answers, aggregator, timestamp: Date.now() };
-        } catch (error) {
-            console.error('Error fetching prices:', error);
-            // Return an empty answers array if there is an error
-            return { aggregator, answers: [], timestamp: Date.now() };
+        // If CoinMarketCap data is available for the aggregator, fetch the data
+        if (aggregator.sources[this.cmc.id]) {
+            sources.push(
+                this.cmc.fetchData(aggregator.sources[this.cmc.id], aggregator.decimals)
+            );
         }
+
+        // If CoinGecko data is available for the aggregator, fetch the data
+        if (aggregator.sources[this.coinGecko.id]) {
+            sources.push(
+                this.coinGecko.fetchData(aggregator.sources[this.coinGecko.id], aggregator.decimals)
+            );
+        }
+
+        // If Chainlink data is available for the aggregator, fetch the data
+        if (aggregator.sources[this.chainlink.id]) {
+            sources.push(
+                this.chainlink.fetchData(aggregator.sources[this.chainlink.id], aggregator.decimals)
+            );
+        }
+
+        // Wait for all the sources to return data and package them with timestamp
+        const answers = await Promise.all(sources);
+
+        return { answers, aggregator, timestamp: Date.now() };
     }
 
     // Writes the fetched answer to the database and blockchain if it meets certain conditions

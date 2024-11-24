@@ -59,6 +59,13 @@ export class AppController {
     return this.appService.getAggregatorDatafeeds(address, page, interval);  // Fetches paginated datafeeds for the specified aggregator
   }
 
+  @Post('/aggregators/request')
+  requestAggregator(
+    @Body() jobData: VRFJobData
+  ): Promise<void> {
+    return this.appService.requestVRF(jobData);
+  }
+
   @Post('/vrf/request')
   requestVRF(
     @Body() jobData: VRFJobData
