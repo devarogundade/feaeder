@@ -8,7 +8,7 @@ const props = defineProps({
     data: { type: Object },
     marker: { type: Boolean },
     domain: { required: true },
-    symbol: {type: String}
+    symbol: { type: String }
 });
 
 const direction = ref<Direction>('horizontal');
@@ -34,7 +34,7 @@ const axis = ref<ChartAxis>({
 </script>
 
 <template>
-    <Chart :size="{ width: 800, height: 500 }" style="color: var(--primary);" :data="(props.data as any)"
+    <Chart :size="{ width: 800, height: 550 }" style="color: var(--tx-semi);" :data="(props.data as any)"
         :margin="margin" :direction="direction" :axis="axis">
 
         <template #layers>

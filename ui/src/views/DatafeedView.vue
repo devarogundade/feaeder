@@ -10,6 +10,7 @@ import Chart from '@/components/Chart.vue';
 import { format as formatDate } from 'timeago.js';
 import CopyIcon from '@/components/icons/CopyIcon.vue';
 import ProgressBox from '@/components/ProgressBox.vue';
+import ToolTip from '@/components/ToolTip.vue';
 
 interface ChartData {
     name: string;
@@ -25,8 +26,8 @@ const minData = ref(Number.MAX_VALUE);
 const maxData = ref(0);
 const interval = ref<Interval>('1d');
 const fetchingAggregator = ref(false);
-const symbol= ref('');
-const notFound= ref(false);
+const symbol = ref('');
+const notFound = ref(false);
 
 const getAggregator = async () => {
     fetchingAggregator.value = true;
@@ -35,13 +36,13 @@ const getAggregator = async () => {
 
     if (!aggregator.value) {
         notFound.value = true;
-        return
+        return;
     }
 
-    if (aggregator.value.name.endsWith('USD')) symbol.value = '$'
-    if (aggregator.value.name.endsWith('ETH')) symbol.value = 'Ξ'
-    if (aggregator.value.name.endsWith('BTC')) symbol.value = '₿'
-    if (aggregator.value.name.endsWith('EUR')) symbol.value = '€'
+    if (aggregator.value.name.endsWith('USD')) symbol.value = '$';
+    if (aggregator.value.name.endsWith('ETH')) symbol.value = 'Ξ';
+    if (aggregator.value.name.endsWith('BTC')) symbol.value = '₿';
+    if (aggregator.value.name.endsWith('EUR')) symbol.value = '€';
 
     fetchingAggregator.value = false;
     getDatafeeds();
@@ -120,13 +121,13 @@ watch(interval, () => {
                         <div class="parameter">
                             <p>Latest Answer</p>
                             <h3>
-                            {{ symbol }}
-                            {{ Converter.toMoney(
-                                Converter.down(
-                                    Converter.getAverage(datafeeds[0].answers.map(a => new BigNumber(a))),
-                                    aggregator.decimals
-                                )
-                            ) }}</h3>
+                                {{ symbol }}
+                                {{ Converter.toMoney(
+                                    Converter.down(
+                                        Converter.getAverage(datafeeds[0].answers.map(a => new BigNumber(a))),
+                                        aggregator.decimals
+                                    )
+                                ) }}</h3>
                         </div>
 
                         <div class="parameter">
@@ -155,10 +156,17 @@ watch(interval, () => {
                             <div class="parameter">
                                 <p>Sources</p>
                                 <div class="images">
-                                    <img v-for="source in Object.keys(aggregator.sources)" :key="source"
-                                        :src="`/images/${source}.png`" :alt="source">
+                                    <ToolTip v-for="source in Object.keys(aggregator.sources)" :key="source"
+                                        :tooltip-text="source">
+                                        <img :src="`/images/${source}.png`" :alt="source">
+                                    </ToolTip>
                                 </div>
                             </div>
+                        </div>
+
+                        <div class="parameter">
+                            <p>Query fee</p>
+                            <h3>0.001 Æ</h3>
                         </div>
 
                         <div class="parameter">
@@ -261,7 +269,7 @@ watch(interval, () => {
     font-size: 12px;
     font-weight: 400;
     color: var(--tx-semi);
-    background: #FFF;
+    background: var(--white);
     text-transform: capitalize;
 }
 
@@ -270,7 +278,7 @@ watch(interval, () => {
     width: 100%;
     display: grid;
     grid-template-columns: 1fr auto;
-    background: #FFF;
+    background: var(--white);
     border: 1px solid var(--bg-darkest);
     border-radius: 4px;
 }
@@ -298,6 +306,8 @@ watch(interval, () => {
 .images img {
     width: 24px;
     height: 24px;
+    border-radius: 20px;
+    object-fit: cover;
 }
 
 .parameter p {
@@ -362,6 +372,6 @@ watch(interval, () => {
 .chart_tools .interval_active {
     border: 1px solid var(--primary);
     color: var(--primary);
-    background: #FFF;
+    background: var(--white);
 }
 </style>

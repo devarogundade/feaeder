@@ -2,14 +2,18 @@ import { AeSdk, CompilerHttp, Contract, Node } from "@aeternity/aepp-sdk";
 import { aci as feaederAci } from "@/acis/feaeder";
 import { getAccounts } from "./connect";
 import type { Subscription, VRF } from "@/types";
-import type BigNumber from "bignumber.js";
+import BigNumber from "bignumber.js";
 
 let aeSdk: AeSdk | null = null;
 const feaederId: `ct_${string}` = `ct_2Z3KJHcBtcCPJrbApBXSXgrqxJ5dzUtpMYCBSxzNEmXEdUPx1z`;
 
 export const vrfs: VRF[] = [
-    { name: 'Rnd Number', address: `ct_2Z3KJHcBtcCPJrbApBXSXgrqxJ5dzUtpMYCBSxzNEmXEdUPx1z`, version: 1, queryFee: 0.01 },
-    { name: 'Rnd String', address: `ct_E7AN2m8WMzzaCdeSLzj9xSEJZvc2tj5yEySPTXd9G4E8tAWQP`, version: 1, queryFee: 0.01 },
+    {
+        name: 'Random Words',
+        address: `ct_2Z3KJHcBtcCPJrbApBXSXgrqxJ5dzUtpMYCBSxzNEmXEdUPx1z`,
+        version: 1,
+        queryFee: '0.001'
+    }
 ];
 
 const getAeSdk = async (): Promise<AeSdk> => {

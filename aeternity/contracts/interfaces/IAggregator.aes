@@ -62,3 +62,5 @@ contract interface IAggregator =
      * @return The most recent datafeed entry.
      */
     entrypoint latest_round_data : () => datafeed
+
+    entrypoint get_request_fees: () => int

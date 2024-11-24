@@ -45,7 +45,7 @@ textarea {
   gap: 10px;
   text-align: center;
   padding: 40px;
-  background: #FFF;
+  background: var(--white);
   border: 1px solid var(--bg-darkest);
   border-radius: 4px;
 }

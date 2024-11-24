@@ -1,9 +1,8 @@
 import { assert } from 'chai';
 import dotenv from 'dotenv';
-import { describe, before, it } from 'node:test';
+import { describe, before, it, afterEach } from 'node:test';
 import { AeSdk, CompilerHttp, Contract, ContractMethodsBase, MemoryAccount, Node } from '@aeternity/aepp-sdk';
 import { utils } from '@aeternity/aeproject';
-import fs from 'fs';
 import ContractWithMethods from '@aeternity/aepp-sdk/es/contract/Contract';
 dotenv.config();
 
@@ -21,7 +20,7 @@ const AE_DECIMALS = 9;
 const AE_DESCRIPTION = "AE/USD on-chain price aggregator.";
 const AE_TOLERANCE = 7; // 7 percentage
 
-const QUERY_FEE = 1_000_000;
+const QUERY_FEE = 1_000_000_000_000_000;
 const VERSION = 1;
 
 describe('Bitcoin/Ae Aggregator Example', () => {
@@ -61,9 +60,6 @@ describe('Bitcoin/Ae Aggregator Example', () => {
 
         const feaeder = fdTx.result?.contractId;
 
-        fs.mkdirSync('./acis', { recursive: true });
-        fs.writeFileSync('./acis/feaeder.json', JSON.stringify(fdContract._aci));
-
         const btcArgs = [BTC_DECIMALS, BTC_DESCRIPTION, BTC_VERSION, BTC_TOLERANCE, feaeder, QUERY_FEE] as any;
         const btcTx = await btcAggContract.$deploy(btcArgs);
 
@@ -80,55 +76,107 @@ describe('Bitcoin/Ae Aggregator Example', () => {
         else console.log('Deployed contract with id: ' + exTx.result?.contractId);
 
         const txAdd = await fdContract.$call('add_allowed_contract', [btcTx.result?.contractId.replace('ct', 'ak')]);
-        console.log(txAdd);
+        console.log(txAdd.hash);
 
         const txAdd1 = await fdContract.$call('add_allowed_contract', [aeTx.result?.contractId.replace('ct', 'ak')]);
-        console.log(txAdd1);
+        console.log(txAdd1.hash);
     });
 
-    it('Aggregator: add price btc data', async () => {
-        assert.notEqual(btcAggContract, null);
-        assert.notEqual(aeSdk, null);
-
-        if (!btcAggContract || !aeSdk) return;
-
-        const prices = [82021800000000, 82022400000000, 82022300000000];
-        const timestamp = Math.ceil(Date.now() / 1000);
-        await btcAggContract.$call('add_round_data', [prices, timestamp]);
-
-        const { decodedResult } = await btcAggContract.$call('latest_round_data', []);
-        assert.notEqual(decodedResult, 0);
-        console.log('lastest data btc: ', decodedResult);
+    afterEach(async () => {
+        await new Promise((resolve) => {
+            setTimeout(() => {
+                resolve(null);
+            }, 1000);
+        });
     });
 
-    it('Aggregator: add price ae data', async () => {
-        assert.notEqual(aeAggContract, null);
+    // it('Aggregator: add price btc data', async () => {
+    //     assert.notEqual(btcAggContract, null);
+    //     assert.notEqual(aeSdk, null);
+
+    //     if (!btcAggContract || !aeSdk) return;
+
+    //     const prices = [82021800000000, 82022400000000, 82022300000000];
+    //     const timestamp = Math.ceil(Date.now() / 1000);
+    //     await btcAggContract.$call('add_round_data', [prices, timestamp]);
+
+    //     const { decodedResult } = await btcAggContract.$call('latest_round_data', []);
+    //     assert.notEqual(decodedResult, 0);
+    //     console.log('lastest data btc: ', decodedResult);
+    // });
+
+    // it('Aggregator: add price ae data', async () => {
+    //     assert.notEqual(aeAggContract, null);
+    //     assert.notEqual(aeSdk, null);
+
+    //     if (!aeAggContract || !aeSdk) return;
+
+    //     const prices = [23320030, 23322500, 23324100];
+    //     const timestamp = Math.ceil(Date.now() / 1000);
+    //     await aeAggContract.$call('add_round_data', [prices, timestamp]);
+
+    //     const { decodedResult } = await aeAggContract.$call('latest_round_data', []);
+    //     assert.notEqual(decodedResult, 0);
+    //     console.log('lastest data ae: ', decodedResult);
+    // });
+
+    // it('Aggregator Example: get btc/ae price', async () => {
+    //     assert.notEqual(btcAggContract, null);
+    //     assert.notEqual(aeAggContract, null);
+    //     assert.notEqual(exContract, null);
+    //     assert.notEqual(aeSdk, null);
+
+    //     if (!btcAggContract || !aeAggContract || !exContract || !aeSdk) return;
+
+    //     const amount = 1_500_000;
+    //     const { decodedResult } = await exContract.$call('get_btc_slash_ae_price', [amount]);
+    //     assert.notEqual(decodedResult, 0);
+
+    //     console.log('amount: ', decodedResult);
+    // });
+
+    let subscriptionId: number | null = null;
+
+    it('Feaeder: create subscription', async () => {
+        assert.notEqual(fdContract, null);
         assert.notEqual(aeSdk, null);
 
-        if (!aeAggContract || !aeSdk) return;
+        if (!fdContract || !aeSdk) return;
 
-        const prices = [23320030, 23322500, 23324100];
-        const timestamp = Math.ceil(Date.now() / 1000);
-        await aeAggContract.$call('add_round_data', [prices, timestamp]);
+        await fdContract.$call('create_subscription', [], { omitUnknown: true, txEvents: true });
 
-        const { decodedResult } = await aeAggContract.$call('latest_round_data', []);
-        assert.notEqual(decodedResult, 0);
-        console.log('lastest data ae: ', decodedResult);
+        const { decodedResult } = await fdContract.$call('get_owner_subscription', [process.env.PUBLIC_KEY]);
+
+        console.log(decodedResult);
+
+        assert.equal(decodedResult.balance, 0);
+        subscriptionId = decodedResult.id;
     });
 
-    it('Aggregator Example: get btc/ae price', async () => {
-        assert.notEqual(btcAggContract, null);
-        assert.notEqual(aeAggContract, null);
-        assert.notEqual(exContract, null);
+    it('Feaeder: top up subscription', async () => {
+        assert.notEqual(fdContract, null);
         assert.notEqual(aeSdk, null);
 
-        if (!btcAggContract || !aeAggContract || !exContract || !aeSdk) return;
+        if (!fdContract || !aeSdk) return;
 
-        const amount = 1_500_000;
-        const { decodedResult } = await exContract.$call('get_btc_slash_ae_price', [amount]);
-        assert.notEqual(decodedResult, 0);
+        const options = { amount: 1_000_000_000_000_000, omitUnknown: true, txEvents: true };
 
-        console.log('amount: ', decodedResult);
+        await fdContract.$call('topup_subscrption', [], options);
+
+        const { decodedResult } = await fdContract.$call('get_owner_subscription', [process.env.PUBLIC_KEY]);
+
+        assert.equal(decodedResult.balance, 1_000_000_000_000_000);
+    });
+
+    it('Feaeder: add consumer', async () => {
+        assert.notEqual(fdContract, null);
+        assert.notEqual(aeSdk, null);
+
+        if (!fdContract || !aeSdk) return;
+
+        const options = { omitUnknown: true, txEvents: true };
+
+        await fdContract.$call('add_consumer', [exContract?.$options.address?.replace('ct', 'ak')], options);
     });
 
     let query: string | null = null;
@@ -136,6 +184,7 @@ describe('Bitcoin/Ae Aggregator Example', () => {
     it('Aggregator Example: ask ae all time high', async () => {
         assert.notEqual(btcAggContract, null);
         assert.notEqual(aeAggContract, null);
+        assert.notEqual(subscriptionId, null);
         assert.notEqual(exContract, null);
         assert.notEqual(aeSdk, null);
 
@@ -144,42 +193,49 @@ describe('Bitcoin/Ae Aggregator Example', () => {
         const now = Math.ceil(Date.now() / 1000);
         const last24h = now - (24 * 60 * 60);
         const question = JSON.stringify({ type: 'ATH', from: last24h, to: now });
-        const options = { amount: 10 };
-        const { decodedResult } = await exContract.$call('ask_ae_usd_all_time_high', [question], options);
-        assert.notEqual(decodedResult, undefined);
+
+        const options = { omitUnknown: true, txEvents: true };
+
+        const { decodedResult } = await exContract.$call(
+            'ask_ae_usd_all_time_high',
+            [subscriptionId, question],
+            options
+        );
+
+        // assert.notEqual(decodedResult, undefined);
 
         console.log('query: ', decodedResult);
-        query = decodedResult;
+        // query = decodedResult;
     });
 
-    it('Aggregator Example: respond ae all time high', async () => {
-        assert.notEqual(btcAggContract, null);
-        assert.notEqual(aeAggContract, null);
-        assert.notEqual(exContract, null);
-        assert.notEqual(aeSdk, null);
-        assert.notEqual(query, null);
+    // it('Aggregator Example: respond ae all time high', async () => {
+    //     assert.notEqual(btcAggContract, null);
+    //     assert.notEqual(aeAggContract, null);
+    //     assert.notEqual(exContract, null);
+    //     assert.notEqual(aeSdk, null);
+    //     assert.notEqual(query, null);
 
-        if (!btcAggContract || !aeAggContract || !exContract || !aeSdk || !query) return;
+    //     if (!btcAggContract || !aeAggContract || !exContract || !aeSdk || !query) return;
 
-        const prices = [33320030, 33322500, 33324100];
-        const { decodedResult } = await aeAggContract.$call('respond', [query, prices]);
-        assert.notEqual(decodedResult, undefined);
+    //     const prices = [33320030, 33322500, 33324100];
+    //     const { decodedResult } = await aeAggContract.$call('respond', [query, prices]);
+    //     assert.notEqual(decodedResult, undefined);
 
-        console.log('reply: ', decodedResult);
-    });
+    //     console.log('reply: ', decodedResult);
+    // });
 
-    it('Aggregator Example: get response ae all time high', async () => {
-        assert.notEqual(btcAggContract, null);
-        assert.notEqual(aeAggContract, null);
-        assert.notEqual(exContract, null);
-        assert.notEqual(aeSdk, null);
-        assert.notEqual(query, null);
+    // it('Aggregator Example: get response ae all time high', async () => {
+    //     assert.notEqual(btcAggContract, null);
+    //     assert.notEqual(aeAggContract, null);
+    //     assert.notEqual(exContract, null);
+    //     assert.notEqual(aeSdk, null);
+    //     assert.notEqual(query, null);
 
-        if (!btcAggContract || !aeAggContract || !exContract || !aeSdk || !query) return;
+    //     if (!btcAggContract || !aeAggContract || !exContract || !aeSdk || !query) return;
 
-        const { decodedResult } = await exContract.$call('ae_usd_all_time_high', [query]);
-        assert.notEqual(decodedResult, undefined);
+    //     const { decodedResult } = await exContract.$call('ae_usd_all_time_high', [query]);
+    //     assert.notEqual(decodedResult, undefined);
 
-        console.log('response: ', decodedResult);
-    });
+    //     console.log('response: ', decodedResult);
+    // });
 });

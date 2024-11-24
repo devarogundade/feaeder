@@ -15,7 +15,7 @@ const router = createRouter({
     },
     {
       path: '/feeds/:id',
-      name: 'datafeed',
+      name: 'datafeeds-id',
       component: DatafeedView,
     },
     {

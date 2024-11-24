@@ -3,7 +3,6 @@ import EnthroLogo from '@/components/icons/EnthroLogo.vue';
 import { useRoute } from 'vue-router';
 import { connectWallet } from '@/scripts/connect';
 import { useWalletStore } from '@/stores/wallet';
-import Converter from '@/scripts/converter';
 import { useToast } from 'vue-toast-notification';
 import 'vue-toast-notification/dist/theme-sugar.css';
 import SearchIcon from './icons/SearchIcon.vue';
@@ -11,11 +10,13 @@ import DocsIcon from './icons/DocsIcon.vue';
 import Button from './Button.vue';
 import { ref } from 'vue';
 import ToolTip from './ToolTip.vue';
+import { useDark } from '@vueuse/core';
 
 const route = useRoute();
 const walletStore = useWalletStore();
 const toast = useToast({ duration: 4000, position: 'top', dismissible: true });
 const connectingWallet = ref(false);
+const isDark = useDark({ attribute: 'data-theme' });
 
 const connect = async () => {
     connectingWallet.value = true;
@@ -40,7 +41,7 @@ const connect = async () => {
                 <div class="contents">
                     <nav class="tabs">
                         <RouterLink to="/">
-                            <button :class="route.name == 'datafeeds' ? 'tab tab_active' : 'tab'">
+                            <button :class="route.name?.toString().includes('datafeeds') ? 'tab tab_active' : 'tab'">
                                 <p>Data Feeds</p>
                             </button>
                         </RouterLink>
@@ -75,6 +76,14 @@ const connect = async () => {
                         <RouterLink to="/subscription" v-else>
                             <Button :text="'My Subscrption'" />
                         </RouterLink>
+
+                        <label class="switch">
+                            <input type="checkbox" :checked="isDark" @change="(e) => {
+                                // @ts-ignore
+                                isDark = e.target.checked;
+                            }">
+                            <span class="slider"></span>
+                        </label>
                     </div>
                 </div>
             </header>
@@ -84,7 +93,7 @@ const connect = async () => {
 
 <style scoped>
 section {
-    background: #FFF;
+    background: var(--white);
     position: sticky;
     top: 0;
     z-index: 1;
@@ -127,7 +136,7 @@ header {
     height: 100%;
     padding: 0 20px;
     border: none;
-    background: #FFF;
+    background: var(--white);
     border-left: 1px solid var(--bg-darkest);
     color: var(--tx-normal);
     font-size: 16px;
@@ -167,7 +176,7 @@ header {
     height: 40px;
     border-radius: 4px;
     border: 1px solid var(--bg-darkest);
-    background: #FFF;
+    background: var(--white);
     padding: 0 10px;
 }
 
@@ -190,5 +199,56 @@ header {
     display: flex;
     align-items: center;
     justify-content: center;
+}
+
+.switch {
+    position: relative;
+    display: inline-block;
+    width: 60px;
+    height: 34px;
+}
+
+.switch input {
+    opacity: 0;
+    width: 0;
+    height: 0;
+}
+
+.slider {
+    position: absolute;
+    cursor: pointer;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background-color: #ccc;
+    -webkit-transition: .4s;
+    transition: .4s;
+}
+
+.slider:before {
+    position: absolute;
+    content: "";
+    height: 26px;
+    width: 26px;
+    left: 4px;
+    bottom: 4px;
+    background-color: white;
+    -webkit-transition: .4s;
+    transition: .4s;
+}
+
+input:checked+.slider {
+    background-color: #2196F3;
+}
+
+input:focus+.slider {
+    box-shadow: 0 0 1px #2196F3;
+}
+
+input:checked+.slider:before {
+    -webkit-transform: translateX(26px);
+    -ms-transform: translateX(26px);
+    transform: translateX(26px);
 }
 </style>

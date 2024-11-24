@@ -11,7 +11,6 @@ contract VRFExample : IVRFReceiver =
     record state = {
         random_winner_idx: int,
         players: map(int, address),
-        valid_request_id: int,
         vrf: IVRF
     }
 
@@ -20,27 +19,21 @@ contract VRFExample : IVRFReceiver =
     stateful entrypoint init( vrf: IVRF
                             ) = { random_winner_idx = 0
                                 , players = {}
-                                , valid_request_id = 0
                                 , vrf = vrf
                                 }
 
     payable stateful entrypoint pick_winner() =
         let request_fees : option(int) = vrf.get_request_fees()
 
-        let request_id : option(int) = state.vrf.request_random_number(value = Option.force(request_fees))
-
-        switch(request_id)
-            None => unit
-            Some(id) => put(state{ valid_request_id = id })
+        state.vrf.request_random_number(value = Option.force(request_fees))
         
     // ============== CALLBACK FUNCTION ============== //
 
     stateful entrypoint fulfill_random_number: ( request_id: int,
-                                                 random_number: int
+                                                 random_words: bytes(64)
                                                ) =
-        require(Call.caller == state.vrf.get_address(), "UNAUTHORIZED_CALLER")
-        require(state.valid_request_id == request_id, "INVALID_REQUEST_ID")
+        require(Call.caller == state.vrf.address, "UNAUTHORIZED_CALLER")
 
-        put(state{ random_winner_idx = random_number })
+        put(state{ random_winner_idx = Bytes.to_int(random_words) })
         
 

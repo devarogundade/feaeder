@@ -4,15 +4,15 @@ import { utils } from '@aeternity/aeproject';
 import fs from 'fs';
 dotenv.config();
 
-const AGGREGATOR_CONTRACT_SOURCE = './contracts/Aggregator.aes';
+const AGGREGATOR_CONTRACT_SOURCE = '../aeternity/contracts/Aggregator.aes';
 
 const VERSION = 1;
 const DECIMALS = 18;
-const DESCRIPTION = "ETH/USD on-chain price aggregator.";
+const DESCRIPTION = "UNI/USD on-chain price aggregator.";
 const TOLERANCE = 5; // 5 percentage
-const QUERY_FEE = 1_000_000;
+const QUERY_FEE = 1_000_000_000_000_000;
 
-const EthUsdAg = {
+const UniUsdAg = {
     run: async (feaeder: string): Promise<string> => {
         const aeSdk = new AeSdk({
             onCompiler: new CompilerHttp('https://v8.compiler.aepps.com'),
@@ -40,7 +40,7 @@ const EthUsdAg = {
         else console.log('Deployed contract with id: ' + tx.result?.contractId);
 
         fs.mkdirSync('./addresses', { recursive: true });
-        fs.writeFileSync('./addresses/eth_usd_aggregator.txt', tx.result?.contractId);
+        fs.writeFileSync('./addresses/uni_usd_aggregator.txt', tx.result?.contractId);
 
         if (!tx.result?.contractId) throw new Error('Failed to deploy');
 
@@ -51,16 +51,14 @@ const EthUsdAg = {
             },
             body: JSON.stringify({
                 address: tx.result?.contractId,
-                image: 'https://feaeder.xyz/images/eth.png',
-                deviationThreshold: 2,
-                pulse: 120_000,
+                image: 'https://testnet.feaeder.xyz/images/uni.png',
+                deviationThreshold: 1,
+                pulse: 320_000,
                 heartbeat: 720_000,
                 updatedAt: Date.now(),
-                name: "ETH / USD",
+                name: "UNI / USD",
                 sources: {
-                    // cmc: ["ETH", "USD"],
-                    // coingecko: ["ethereum", "usd"],
-                    chainlink: ["https://eth.llamarpc.com", "0x5f4eC3Df9cbd43714FE2740f5E3616155c5b8419"]
+                    chainlink: ["https://eth.llamarpc.com", "0x553303d460EE0afB37EdFf9bE42922D8FF63220e"]
                 },
                 description: DESCRIPTION,
                 category: "crypto",
@@ -71,10 +69,10 @@ const EthUsdAg = {
 
         const response = await data.json();
 
-        console.log('Aggregator ETH/USD hosted: ' + JSON.stringify(response, null, 2));
+        console.log('Aggregator UNI/USD hosted: ' + JSON.stringify(response, null, 2));
 
         return tx.result?.contractId;
     }
 };
 
-export default EthUsdAg;
+export default UniUsdAg;

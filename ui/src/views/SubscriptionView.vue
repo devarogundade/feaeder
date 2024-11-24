@@ -404,7 +404,7 @@ watch(walletStore, (store) => {
 }
 
 .tbody .tr {
-    background: #FFF;
+    background: var(--white);
     border-radius: 4px;
     margin-bottom: 10px;
     border: 1px solid var(--bg-darkest);

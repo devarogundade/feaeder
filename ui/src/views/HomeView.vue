@@ -383,7 +383,7 @@ section {
   font-size: 12px;
   font-weight: 400;
   color: var(--tx-semi);
-  background: #FFF;
+  background: var(--white);
 }
 
 .filter svg {
@@ -392,7 +392,7 @@ section {
 }
 
 .filter_active {
-  background: #FFF;
+  background: var(--white);
   color: var(--primary);
   border: 1px solid var(--primary);
 }
@@ -423,7 +423,7 @@ section {
   border: 1px solid var(--primary);
   color: var(--primary);
   font-weight: 600;
-  background: #FFF;
+  background: var(--white);
 }
 
 .table {
@@ -475,7 +475,7 @@ section {
 }
 
 .tbody .tr {
-  background: #FFF;
+  background: var(--white);
   border-radius: 4px;
   margin-bottom: 10px;
   border: 1px solid var(--bg-darkest);
@@ -525,7 +525,7 @@ a p {
 }
 
 .pagination .button_active {
-  background: #FFF;
+  background: var(--white);
   border: 2px solid var(--primary);
   color: var(--primary);
 }

@@ -4,15 +4,15 @@ import { utils } from '@aeternity/aeproject';
 import fs from 'fs';
 dotenv.config();
 
-const AGGREGATOR_CONTRACT_SOURCE = './contracts/Aggregator.aes';
+const AGGREGATOR_CONTRACT_SOURCE = '../aeternity/contracts/Aggregator.aes';
 
 const VERSION = 1;
 const DECIMALS = 18;
-const DESCRIPTION = "EUR/USD on-chain price aggregator.";
+const DESCRIPTION = "ETH/USD on-chain price aggregator.";
 const TOLERANCE = 5; // 5 percentage
-const QUERY_FEE = 1_000_000;
+const QUERY_FEE = 1_000_000_000_000_000;
 
-const EurUsdAg = {
+const EthUsdAg = {
     run: async (feaeder: string): Promise<string> => {
         const aeSdk = new AeSdk({
             onCompiler: new CompilerHttp('https://v8.compiler.aepps.com'),
@@ -40,7 +40,7 @@ const EurUsdAg = {
         else console.log('Deployed contract with id: ' + tx.result?.contractId);
 
         fs.mkdirSync('./addresses', { recursive: true });
-        fs.writeFileSync('./addresses/eur_usd_aggregator.txt', tx.result?.contractId);
+        fs.writeFileSync('./addresses/eth_usd_aggregator.txt', tx.result?.contractId);
 
         if (!tx.result?.contractId) throw new Error('Failed to deploy');
 
@@ -51,17 +51,19 @@ const EurUsdAg = {
             },
             body: JSON.stringify({
                 address: tx.result?.contractId,
-                image: 'https://feaeder.xyz/images/eur.png',
-                deviationThreshold: 0.15,
-                pulse: 600_000,
-                heartbeat: 1_200_000,
+                image: 'https://testnet.feaeder.xyz/images/eth.png',
+                deviationThreshold: 2,
+                pulse: 120_000,
+                heartbeat: 720_000,
                 updatedAt: Date.now(),
-                name: "EUR / USD",
+                name: "ETH / USD",
                 sources: {
-                    chainlink: ["https://eth.llamarpc.com", "0xb49f677943BC038e9857d61E7d053CaA2C1734C1"]
+                    // cmc: ["ETH", "USD"],
+                    // coingecko: ["ethereum", "usd"],
+                    chainlink: ["https://eth.llamarpc.com", "0x5f4eC3Df9cbd43714FE2740f5E3616155c5b8419"]
                 },
                 description: DESCRIPTION,
-                category: "fiat",
+                category: "crypto",
                 version: VERSION,
                 decimals: DECIMALS
             })
@@ -69,10 +71,10 @@ const EurUsdAg = {
 
         const response = await data.json();
 
-        console.log('Aggregator EUR/USD hosted: ' + JSON.stringify(response, null, 2));
+        console.log('Aggregator ETH/USD hosted: ' + JSON.stringify(response, null, 2));
 
         return tx.result?.contractId;
     }
 };
 
-export default EurUsdAg;
+export default EthUsdAg;

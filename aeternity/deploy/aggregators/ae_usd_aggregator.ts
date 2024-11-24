@@ -4,15 +4,15 @@ import { utils } from '@aeternity/aeproject';
 import fs from 'fs';
 dotenv.config();
 
-const AGGREGATOR_CONTRACT_SOURCE = './contracts/Aggregator.aes';
+const AGGREGATOR_CONTRACT_SOURCE = '../aeternity/contracts/Aggregator.aes';
 
 const VERSION = 1;
 const DECIMALS = 18;
-const DESCRIPTION = "ETH/BTC on-chain price aggregator.";
+const DESCRIPTION = "AE/USD on-chain price aggregator.";
 const TOLERANCE = 5; // 5 percentage
-const QUERY_FEE = 1_000_000;
+const QUERY_FEE = 1_000_000_000_000_000;
 
-const EthBtcAg = {
+const AeUsdAg = {
     run: async (feaeder: string): Promise<string> => {
         const aeSdk = new AeSdk({
             onCompiler: new CompilerHttp('https://v8.compiler.aepps.com'),
@@ -40,7 +40,7 @@ const EthBtcAg = {
         else console.log('Deployed contract with id: ' + tx.result?.contractId);
 
         fs.mkdirSync('./addresses', { recursive: true });
-        fs.writeFileSync('./addresses/eth_btc_aggregator.txt', tx.result?.contractId);
+        fs.writeFileSync('./addresses/ae_usd_aggregator.txt', tx.result?.contractId);
 
         if (!tx.result?.contractId) throw new Error('Failed to deploy');
 
@@ -51,14 +51,15 @@ const EthBtcAg = {
             },
             body: JSON.stringify({
                 address: tx.result?.contractId,
-                image: 'https://feaeder.xyz/images/eth.png',
+                image: 'https://testnet.feaeder.xyz/images/ae.png',
                 deviationThreshold: 0.5,
                 pulse: 600_000,
-                heartbeat: 1_200_000,
+                heartbeat: 1_000_000,
                 updatedAt: Date.now(),
-                name: "ETH / BTC",
+                name: "AE / USD",
                 sources: {
-                    chainlink: ["https://eth.llamarpc.com", "0xAc559F25B1619171CbC396a50854A3240b6A4e99"]
+                    cmc: ["AE", "USD"],
+                    coingecko: ["aeternity", "usd"]
                 },
                 description: DESCRIPTION,
                 category: "crypto",
@@ -69,10 +70,10 @@ const EthBtcAg = {
 
         const response = await data.json();
 
-        console.log('Aggregator ETH/BTC hosted: ' + JSON.stringify(response, null, 2));
+        console.log('Aggregator AE/USD hosted: ' + JSON.stringify(response, null, 2));
 
         return tx.result?.contractId;
     }
 };
 
-export default EthBtcAg;
+export default AeUsdAg;

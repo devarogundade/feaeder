@@ -4,15 +4,15 @@ import { utils } from '@aeternity/aeproject';
 import fs from 'fs';
 dotenv.config();
 
-const AGGREGATOR_CONTRACT_SOURCE = './contracts/Aggregator.aes';
+const AGGREGATOR_CONTRACT_SOURCE = '../aeternity/contracts/Aggregator.aes';
 
 const VERSION = 1;
 const DECIMALS = 18;
-const DESCRIPTION = "XAG/USD on-chain price aggregator.";
+const DESCRIPTION = "BTC/USD on-chain price aggregator.";
 const TOLERANCE = 5; // 5 percentage
-const QUERY_FEE = 1_000_000;
+const QUERY_FEE = 1_000_000_000_000_000;
 
-const XagUsdAg = {
+const BtcUsdAg = {
     run: async (feaeder: string): Promise<string> => {
         const aeSdk = new AeSdk({
             onCompiler: new CompilerHttp('https://v8.compiler.aepps.com'),
@@ -40,7 +40,7 @@ const XagUsdAg = {
         else console.log('Deployed contract with id: ' + tx.result?.contractId);
 
         fs.mkdirSync('./addresses', { recursive: true });
-        fs.writeFileSync('./addresses/xag_usd_aggregator.txt', tx.result?.contractId);
+        fs.writeFileSync('./addresses/btc_usd_aggregator.txt', tx.result?.contractId);
 
         if (!tx.result?.contractId) throw new Error('Failed to deploy');
 
@@ -51,17 +51,19 @@ const XagUsdAg = {
             },
             body: JSON.stringify({
                 address: tx.result?.contractId,
-                image: 'https://feaeder.xyz/images/xag.png',
-                deviationThreshold: 0.3,
-                pulse: 600_000,
-                heartbeat: 1_200_000,
+                image: 'https://testnet.feaeder.xyz/images/btc.png',
+                deviationThreshold: 0.5,
+                pulse: 120_000,
+                heartbeat: 360_000,
                 updatedAt: Date.now(),
-                name: "XAG / USD",
+                name: "BTC / USD",
                 sources: {
-                    chainlink: ["https://eth.llamarpc.com", "0x214eD9Da11D2fbe465a6fc601a91E62EbEc1a0D6"]
+                    // cmc: ["BTC", "USD"],
+                    // coingecko: ["bitcoin", "usd"],
+                    chainlink: ["https://eth.llamarpc.com", "0xF4030086522a5bEEa4988F8cA5B36dbC97BeE88c"]
                 },
                 description: DESCRIPTION,
-                category: "commodity",
+                category: "crypto",
                 version: VERSION,
                 decimals: DECIMALS
             })
@@ -69,10 +71,10 @@ const XagUsdAg = {
 
         const response = await data.json();
 
-        console.log('Aggregator XAG/USD hosted: ' + JSON.stringify(response, null, 2));
+        console.log('Aggregator BTC/USD hosted: ' + JSON.stringify(response, null, 2));
 
         return tx.result?.contractId;
     }
 };
 
-export default XagUsdAg;
+export default BtcUsdAg;

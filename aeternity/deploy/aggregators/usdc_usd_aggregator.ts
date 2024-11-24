@@ -4,15 +4,15 @@ import { utils } from '@aeternity/aeproject';
 import fs from 'fs';
 dotenv.config();
 
-const AGGREGATOR_CONTRACT_SOURCE = './contracts/Aggregator.aes';
+const AGGREGATOR_CONTRACT_SOURCE = '../aeternity/contracts/Aggregator.aes';
 
 const VERSION = 1;
 const DECIMALS = 18;
-const DESCRIPTION = "GBP/USD on-chain price aggregator.";
+const DESCRIPTION = "USDC/USD on-chain price aggregator.";
 const TOLERANCE = 5; // 5 percentage
-const QUERY_FEE = 1_000_000;
+const QUERY_FEE = 1_000_000_000_000_000;
 
-const GbpUsdAg = {
+const UsdcUsdAg = {
     run: async (feaeder: string): Promise<string> => {
         const aeSdk = new AeSdk({
             onCompiler: new CompilerHttp('https://v8.compiler.aepps.com'),
@@ -40,7 +40,7 @@ const GbpUsdAg = {
         else console.log('Deployed contract with id: ' + tx.result?.contractId);
 
         fs.mkdirSync('./addresses', { recursive: true });
-        fs.writeFileSync('./addresses/gbp_usd_aggregator.txt', tx.result?.contractId);
+        fs.writeFileSync('./addresses/usdc_usd_aggregator.txt', tx.result?.contractId);
 
         if (!tx.result?.contractId) throw new Error('Failed to deploy');
 
@@ -51,17 +51,17 @@ const GbpUsdAg = {
             },
             body: JSON.stringify({
                 address: tx.result?.contractId,
-                image: 'https://feaeder.xyz/images/gbp.png',
-                deviationThreshold: 0.15,
-                pulse: 600_000,
-                heartbeat: 1_200_000,
+                image: 'https://testnet.feaeder.xyz/images/usdc.png',
+                deviationThreshold: 1,
+                pulse: 200_000,
+                heartbeat: 720_000,
                 updatedAt: Date.now(),
-                name: "GBP / USD",
+                name: "USDC / USD",
                 sources: {
-                    chainlink: ["https://eth.llamarpc.com", "0x5c0Ab2d9b5a7ed9f470386e82BB36A3613cDd4b5"]
+                    chainlink: ["https://eth.llamarpc.com", "0x8fFfFfd4AfB6115b954Bd326cbe7B4BA576818f6"]
                 },
                 description: DESCRIPTION,
-                category: "fiat",
+                category: "crypto",
                 version: VERSION,
                 decimals: DECIMALS
             })
@@ -69,10 +69,10 @@ const GbpUsdAg = {
 
         const response = await data.json();
 
-        console.log('Aggregator GBP/USD hosted: ' + JSON.stringify(response, null, 2));
+        console.log('Aggregator USDC/USD hosted: ' + JSON.stringify(response, null, 2));
 
         return tx.result?.contractId;
     }
 };
 
-export default GbpUsdAg;
+export default UsdcUsdAg;

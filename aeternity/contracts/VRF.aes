@@ -28,43 +28,38 @@ contract VRF =
                             ) = { relayer = Call.caller
                                 , last_request_id = 0
                                 , feaeder = feaeder
-                                , query_fee = query_fee
-                                }
+                                , query_fee = query_fee }
 
     // ============== MUTATIVE FUNCTIONS ============== //
 
     stateful entrypoint request_random_number( subscription_id: int
                                              ) =
-        state.feaeder.use_subscription(
-            subscription_id,
-            Call.caller,
-            state.query_fee
-            )
-            
-        let sender : address = Call.caller
+        let consumer = Call.caller
+
+        let success = state.feaeder.use_subscription( subscription_id
+                                                    , consumer
+                                                    , state.query_fee )
+
+        require(Option.force(success), "INVALID USE SUBSCRIPTION")
 
         let request_id = state.last_request_id + 1
         
-        put(state { last_request_id = request_id })
+        put(state { last_request_id = request_id 
+                  })
         
-        Chain.event(RandomNumberRequested(request_id, sender))
+        Chain.event(RandomNumberRequested(request_id, consumer))
 
         request_id
 
 
-    stateful entrypoint fulfill_random_number( request_id: int,
-                                               receiver: IVRFReceiver,
-                                               random_number: int
-                                             ) =
+    stateful entrypoint fulfill_random_number( request_id: int
+                                             , receiver: IVRFReceiver
+                                             , random_words: bytes(64) ) =
         require_relayer()
 
-        receiver.fulfill_random_number(request_id, random_number)
+        receiver.fulfill_random_number(request_id, random_words)
 
         Chain.event(RandomNumberFulfilled(request_id))
-
-    // ============== STATE VIEW FUNCTIONS ============== //
-
-    entrypoint get_address(): address = Contract.address
 
     // ============== STATE VIEW FUNCTIONS ============== //
 

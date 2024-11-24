@@ -4,15 +4,15 @@ import { utils } from '@aeternity/aeproject';
 import fs from 'fs';
 dotenv.config();
 
-const AGGREGATOR_CONTRACT_SOURCE = './contracts/Aggregator.aes';
+const AGGREGATOR_CONTRACT_SOURCE = '../aeternity/contracts/Aggregator.aes';
 
 const VERSION = 1;
 const DECIMALS = 18;
-const DESCRIPTION = "UNI/USD on-chain price aggregator.";
+const DESCRIPTION = "CNY/USD on-chain price aggregator.";
 const TOLERANCE = 5; // 5 percentage
-const QUERY_FEE = 1_000_000;
+const QUERY_FEE = 1_000_000_000_000_000;
 
-const UniUsdAg = {
+const CnyUsdAg = {
     run: async (feaeder: string): Promise<string> => {
         const aeSdk = new AeSdk({
             onCompiler: new CompilerHttp('https://v8.compiler.aepps.com'),
@@ -40,7 +40,7 @@ const UniUsdAg = {
         else console.log('Deployed contract with id: ' + tx.result?.contractId);
 
         fs.mkdirSync('./addresses', { recursive: true });
-        fs.writeFileSync('./addresses/uni_usd_aggregator.txt', tx.result?.contractId);
+        fs.writeFileSync('./addresses/cny_usd_aggregator.txt', tx.result?.contractId);
 
         if (!tx.result?.contractId) throw new Error('Failed to deploy');
 
@@ -51,17 +51,17 @@ const UniUsdAg = {
             },
             body: JSON.stringify({
                 address: tx.result?.contractId,
-                image: 'https://feaeder.xyz/images/uni.png',
-                deviationThreshold: 1,
-                pulse: 320_000,
-                heartbeat: 720_000,
+                image: 'https://testnet.feaeder.xyz/images/cny.png',
+                deviationThreshold: 0.3,
+                pulse: 600_000,
+                heartbeat: 1_200_000,
                 updatedAt: Date.now(),
-                name: "UNI / USD",
+                name: "CNY / USD",
                 sources: {
-                    chainlink: ["https://eth.llamarpc.com", "0x553303d460EE0afB37EdFf9bE42922D8FF63220e"]
+                    chainlink: ["https://eth.llamarpc.com", "0xeF8A4aF35cd47424672E3C590aBD37FBB7A7759a"]
                 },
                 description: DESCRIPTION,
-                category: "crypto",
+                category: "fiat",
                 version: VERSION,
                 decimals: DECIMALS
             })
@@ -69,10 +69,10 @@ const UniUsdAg = {
 
         const response = await data.json();
 
-        console.log('Aggregator UNI/USD hosted: ' + JSON.stringify(response, null, 2));
+        console.log('Aggregator CNY/USD hosted: ' + JSON.stringify(response, null, 2));
 
         return tx.result?.contractId;
     }
 };
 
-export default UniUsdAg;
+export default CnyUsdAg;

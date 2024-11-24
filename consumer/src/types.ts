@@ -20,3 +20,8 @@ export interface DataSource {
     id: string;
     fetchData: (tickers: string[], decimals: number) => Promise<BigNumber>;
 }
+
+export interface VRFJobData {
+    requestId: string,
+    to: `ct_${string}`;
+}

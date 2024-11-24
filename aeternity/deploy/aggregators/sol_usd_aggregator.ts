@@ -4,15 +4,15 @@ import { utils } from '@aeternity/aeproject';
 import fs from 'fs';
 dotenv.config();
 
-const AGGREGATOR_CONTRACT_SOURCE = './contracts/Aggregator.aes';
+const AGGREGATOR_CONTRACT_SOURCE = '../aeternity/contracts/Aggregator.aes';
 
 const VERSION = 1;
 const DECIMALS = 18;
-const DESCRIPTION = "BNB/USD on-chain price aggregator.";
+const DESCRIPTION = "SOL/USD on-chain price aggregator.";
 const TOLERANCE = 5; // 5 percentage
-const QUERY_FEE = 1_000_000;
+const QUERY_FEE = 1_000_000_000_000_000;
 
-const BnbUsdAg = {
+const SolUsdAg = {
     run: async (feaeder: string): Promise<string> => {
         const aeSdk = new AeSdk({
             onCompiler: new CompilerHttp('https://v8.compiler.aepps.com'),
@@ -40,7 +40,7 @@ const BnbUsdAg = {
         else console.log('Deployed contract with id: ' + tx.result?.contractId);
 
         fs.mkdirSync('./addresses', { recursive: true });
-        fs.writeFileSync('./addresses/bnb_usd_aggregator.txt', tx.result?.contractId);
+        fs.writeFileSync('./addresses/sol_usd_aggregator.txt', tx.result?.contractId);
 
         if (!tx.result?.contractId) throw new Error('Failed to deploy');
 
@@ -51,14 +51,14 @@ const BnbUsdAg = {
             },
             body: JSON.stringify({
                 address: tx.result?.contractId,
-                image: 'https://feaeder.xyz/images/bnb.png',
+                image: 'https://testnet.feaeder.xyz/images/sol.png',
                 deviationThreshold: 1,
-                pulse: 120_000,
+                pulse: 220_000,
                 heartbeat: 720_000,
                 updatedAt: Date.now(),
-                name: "BNB / USD",
+                name: "SOL / USD",
                 sources: {
-                    chainlink: ["https://eth.llamarpc.com", "0x14e613AC84a31f709eadbdF89C6CC390fDc9540A"]
+                    chainlink: ["https://eth.llamarpc.com", "0x4ffC43a60e009B551865A93d232E33Fce9f01507"]
                 },
                 description: DESCRIPTION,
                 category: "crypto",
@@ -69,10 +69,10 @@ const BnbUsdAg = {
 
         const response = await data.json();
 
-        console.log('Aggregator BNB/USD hosted: ' + JSON.stringify(response, null, 2));
+        console.log('Aggregator SOL/USD hosted: ' + JSON.stringify(response, null, 2));
 
         return tx.result?.contractId;
     }
 };
 
-export default BnbUsdAg;
+export default SolUsdAg;

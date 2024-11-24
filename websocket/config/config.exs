@@ -1,12 +1,11 @@
 import Config
 
-config :websocket, :default_settings, %{
-  ws_url: "wss://testnet.aeternity.io/mdw/v2/websocket",
+config :websocket,
+  ws_url: "wss://testnet.aeternity.io/mdw/v3/websocket",
+  feaeder: "ct_oqtjhjSZoguojdSvF2zMmU8wXqx1dmHhF5XX6gpEzdrA5SQmp",
   aggregators: [
-    "ct_284BS8M4mWXTji2HRYHkMjzx4dLzLqoqZeDA3KYsEf5djvUkEi",
+    "ct_rd7ao3N7htTLKBwRBas6c6WFD4oR9zFk3ktbezppqAWwW1m36",
   ],
   vrfs: [
-    "",
     ""
   ]
-}

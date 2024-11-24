@@ -35,8 +35,7 @@ contract Feaeder =
                                            , subscription_owners = {}
                                            , last_subscription_id = 0
                                            , version = version
-                                           , allowed_contracts = []
-                                           }
+                                           , allowed_contracts = [] }
 
   stateful entrypoint create_subscription() =
     let sender = Call.caller
@@ -45,18 +44,19 @@ contract Feaeder =
 
     let subscription_id = state.last_subscription_id + 1
 
-    put(state { subscriptions[subscription_id] = {
-                id = subscription_id,
-                creator = sender,
-                timestamp = Chain.timestamp,
-                version = state.version,
-                balance = 0,
-                spent = 0,
-                consumers = []
-            } })
+    put(state { subscriptions[subscription_id] = { id = subscription_id
+              , creator = sender
+              , timestamp = Chain.timestamp
+              , version = state.version
+              , balance = 0
+              , spent = 0
+              , consumers = []} })
 
-    put(state { subscription_owners[sender] = subscription_id })
-    put(state { last_subscription_id = subscription_id })
+    put(state { subscription_owners[sender] = subscription_id 
+              })
+
+    put(state { last_subscription_id = subscription_id 
+              })
 
     Chain.event(SubscriptonCreated(sender, subscription_id))
 
@@ -71,8 +71,9 @@ contract Feaeder =
     let subscription_id = state.subscription_owners[sender]
     let subscription = state.subscriptions[subscription_id]
 
-    put(state { subscriptions[subscription_id].balance = 
-                state.subscriptions[subscription_id].balance + amount
+    let new_balance = subscription.balance + amount
+
+    put(state { subscriptions[subscription_id].balance = new_balance
               })
 
     Chain.event(SubscriptonTopup(subscription_id, amount))
@@ -89,15 +90,19 @@ contract Feaeder =
 
     require(amount =< subscription.balance, "INSUFFICIENT_BALANCE")
 
-    put(state { subscriptions[subscription_id].balance =
-                state.subscriptions[subscription_id].balance - amount
+    let new_balance = subscription.balance - amount
+
+    put(state { subscriptions[subscription_id].balance = new_balance
               })
 
     Chain.spend(sender, amount)
 
     Chain.event(SubscriptonWithdrawn(subscription_id, amount))
 
-  stateful entrypoint use_subscription(subscription_id: int, consumer: address, cost: int) =
+  stateful entrypoint use_subscription( subscription_id: int
+                                      , consumer: address
+                                      , cost: int
+                                      ) : bool =
     require_allowed_contract()
 
     let subscription = state.subscriptions[subscription_id]
@@ -105,15 +110,18 @@ contract Feaeder =
     require(List.contains(consumer, subscription.consumers), "UNAUTHORIZED")
     require(subscription.balance >= cost, "INSUFFICIENT_BALANCE")
 
-    put(state { subscriptions[subscription_id].balance =
-                state.subscriptions[subscription_id].balance - cost
+    let new_balance = subscription.balance - cost
+    let new_spent = subscription.spent + cost
+
+    put(state { subscriptions[subscription_id].balance = new_balance
               })
 
-    put(state { subscriptions[subscription_id].spent =
-                state.subscriptions[subscription_id].spent + cost
+    put(state { subscriptions[subscription_id].spent = new_spent
               })
 
     Chain.event(SubscriptonUsed(subscription_id, cost))
+
+    true
 
   stateful entrypoint add_consumer(consumer: address) =
     let sender = Call.caller
@@ -126,7 +134,7 @@ contract Feaeder =
     let consumers = List.insert_at(0, consumer, subscription.consumers)
     
     put(state{ subscriptions[subscription_id].consumers = consumers
-            })
+             })
 
     Chain.event(ConsumerAdded(subscription_id, consumer))
 
@@ -138,13 +146,11 @@ contract Feaeder =
     let subscription_id = state.subscription_owners[sender]
     let subscription = state.subscriptions[subscription_id]
 
-    let consumers = List.filter(
-      (consumer) => old_consumer != consumer, 
-      subscription.consumers
-      )
+    let consumers = List.filter((consumer) => old_consumer != consumer 
+                               , subscription.consumers)
     
     put(state{ subscriptions[subscription_id].consumers = consumers
-            })
+             })
 
     Chain.event(ConsumerRemoved(subscription_id, old_consumer))
 
@@ -153,31 +159,34 @@ contract Feaeder =
 
     require(!List.contains(new_allowed_contract, state.allowed_contracts), "ALREADY_ADDED")
 
-    put(state { allowed_contracts = List.insert_at(0, new_allowed_contract, state.allowed_contracts) 
-            })
+    let new_allowed_contracts = List.insert_at(0
+                                              , new_allowed_contract
+                                              , state.allowed_contracts)
+
+    put(state { allowed_contracts = new_allowed_contracts 
+              })
 
   stateful entrypoint remove_allowed_contract(old_allowed_contract: address) =
     require_controller()
 
     require(List.contains(old_allowed_contract, state.allowed_contracts), "NOT_EXISTS")
 
-    let new_allowed_contracts = List.filter(
-      (allowed_contract) => old_allowed_contract != allowed_contract, 
-      state.allowed_contracts
-      )
+    let new_allowed_contracts = List.filter((allowed_contract) => old_allowed_contract != allowed_contract
+                                           , state.allowed_contracts)
 
-    put(state { allowed_contracts = new_allowed_contracts })
+    put(state { allowed_contracts = new_allowed_contracts 
+              })
 
   stateful entrypoint withdraw_admin(receiver: address, amount: int) =
     require_controller()
 
     Chain.spend(receiver, amount)
 
-  entrypoint get_subscription_id(owner: address) : int = state.subscription_owners[owner]
+  entrypoint get_subscription_id(owner: address) = state.subscription_owners[owner]
 
-  entrypoint get_subscription(subscription_id: int) : subscription = state.subscriptions[subscription_id]
+  entrypoint get_subscription(subscription_id: int) = state.subscriptions[subscription_id]
 
-  entrypoint get_owner_subscription(owner: address) : subscription =
+  entrypoint get_owner_subscription(owner: address) =
     let subscription_id = state.subscription_owners[owner]
     state.subscriptions[subscription_id]
 

@@ -3,7 +3,6 @@ import dotenv from 'dotenv';
 import { describe, before, it } from 'node:test';
 import { AeSdk, CompilerHttp, Contract, ContractMethodsBase, MemoryAccount, Node } from '@aeternity/aepp-sdk';
 import { utils } from '@aeternity/aeproject';
-import fs from 'fs';
 import ContractWithMethods from '@aeternity/aepp-sdk/es/contract/Contract';
 dotenv.config();
 
@@ -14,7 +13,7 @@ const VERSION = 1;
 const DECIMALS = 9;
 const DESCRIPTION = "BTC/USD on-chain price aggregator.";
 const TOLERANCE = 5; // 5 percentage
-const QUERY_FEE = 1_000_000;
+const QUERY_FEE = 1_000_000_000_000_000;
 
 describe('Bitcoin Usd Aggregator', () => {
     let aeSdk: AeSdk | null = null;

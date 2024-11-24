@@ -1,32 +1,36 @@
-defmodule Websocket do
+defmodule Websocket.Main do
   @moduledoc """
   A WebSocket client that listens for messages and processes them.
   """
   use WebSockex
 
-  @ws_url Application.get_env(:your_app, :ws_url)
-  @aggregators Application.get_env(:your_app, :aggregators)
-  @vrf Application.get_env(:your_app, :vrf)
+  @ws_url Application.compile_env(:websocket, :ws_url)
+  @aggregators Application.compile_env(:websocket, :aggregators)
+  @vrfs Application.compile_env(:websocket, :vrfs)
 
   # Start the WebSocket connection
   def start_link() do
     WebSockex.start_link(
       @ws_url,
       __MODULE__,
-      %{},
-      timeout: 10_000 # Timeout set to 10 seconds (10,000 milliseconds)
+      %{}
     )
   end
 
   # Handle WebSocket connection success
   def handle_connect(_conn, state) do
     IO.puts("WebSocket Client Connected")
-    send_subscription_requests()
+
+    @aggregators
+    |> Enum.each(&send_subscription_request/1)
+
     {:ok, state}
   end
 
   # Handle incoming messages
   def handle_frame({:text, message}, state) do
+    IO.puts("Received message: #{message}")
+
     case Jason.decode(message) do
       {:ok, %{"payload" => %{"hash" => hash}} = data} ->
         if Map.get(data, "utf8Data") != "connected" do
@@ -46,12 +50,6 @@ defmodule Websocket do
   def handle_disconnect(reason, state) do
     IO.puts("Connection Closed: #{inspect(reason)}")
     {:ok, state}
-  end
-
-  # Send subscription requests for all contract addresses
-  defp send_subscription_requests() do
-    @aggregators
-    |> Enum.each(&send_subscription_request/1)
   end
 
   # Send a subscription request for a specific contract address

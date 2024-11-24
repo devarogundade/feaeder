@@ -23,8 +23,8 @@
 }
 
 :root {
-  --primary: rgb(36, 89, 70);
-  --primary-light: rgb(229, 200, 46);
+  --primary: #ff2d55;
+  --primary-light: #c36778;
 
   --tx-normal: rgb(22, 22, 24);
   --tx-dimmed: rgb(171, 173, 174);
@@ -35,7 +35,27 @@
   --bg-darker: rgb(235, 235, 235);
   --bg-dark: rgb(245, 245, 245);
 
-  --tooltip-bg: #fffef6;
+  --tooltip-bg: #fff6fc;
 
   --sm-red: #F06979;
+  --white: #FFFFFF;
+}
+
+[data-theme="dark"] {
+  --primary: #c36778;
+  --primary-light: #ff2d55;
+
+  --tx-normal: rgba(238, 241, 248, 1);
+  --tx-dimmed: rgba(108, 110, 115, 1);
+  --tx-semi: rgba(139, 144, 158, 1);
+
+  --bg: rgba(20, 20, 21, 1);
+  --bg-darkest: rgba(32, 34, 39, 1);
+  --bg-darker: rgba(26, 28, 30, 1);
+  --bg-dark: rgba(24, 25, 27, 1);
+
+  --tooltip-bg: #6b1424;
+
+  --sm-red: #F06979;
+  --white: rgba(16, 16, 14, 1);
 }
