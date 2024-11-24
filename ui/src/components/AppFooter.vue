@@ -32,4 +32,10 @@ footer {
     align-items: center;
     justify-content: space-between;
 }
+
+footer p {
+    font-size: 14px;
+    font-weight: 500;
+    color: var(--tx-semi);
+}
 </style>

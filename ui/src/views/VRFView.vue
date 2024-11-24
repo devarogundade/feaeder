@@ -245,6 +245,7 @@ section {
 .name {
     font-size: 30px;
     font-weight: 500;
+    color: var(--tx-normal);
 }
 
 .thead {
