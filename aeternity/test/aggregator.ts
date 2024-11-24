@@ -90,50 +90,50 @@ describe('Bitcoin/Ae Aggregator Example', () => {
         });
     });
 
-    // it('Aggregator: add price btc data', async () => {
-    //     assert.notEqual(btcAggContract, null);
-    //     assert.notEqual(aeSdk, null);
+    it('Aggregator: add price btc data', async () => {
+        assert.notEqual(btcAggContract, null);
+        assert.notEqual(aeSdk, null);
 
-    //     if (!btcAggContract || !aeSdk) return;
+        if (!btcAggContract || !aeSdk) return;
 
-    //     const prices = [82021800000000, 82022400000000, 82022300000000];
-    //     const timestamp = Math.ceil(Date.now() / 1000);
-    //     await btcAggContract.$call('add_round_data', [prices, timestamp]);
+        const prices = [82021800000000, 82022400000000, 82022300000000];
+        const timestamp = Math.ceil(Date.now() / 1000);
+        await btcAggContract.$call('add_round_data', [prices, timestamp]);
 
-    //     const { decodedResult } = await btcAggContract.$call('latest_round_data', []);
-    //     assert.notEqual(decodedResult, 0);
-    //     console.log('lastest data btc: ', decodedResult);
-    // });
+        const { decodedResult } = await btcAggContract.$call('latest_round_data', []);
+        assert.notEqual(decodedResult, 0);
+        console.log('lastest data btc: ', decodedResult);
+    });
 
-    // it('Aggregator: add price ae data', async () => {
-    //     assert.notEqual(aeAggContract, null);
-    //     assert.notEqual(aeSdk, null);
+    it('Aggregator: add price ae data', async () => {
+        assert.notEqual(aeAggContract, null);
+        assert.notEqual(aeSdk, null);
 
-    //     if (!aeAggContract || !aeSdk) return;
+        if (!aeAggContract || !aeSdk) return;
 
-    //     const prices = [23320030, 23322500, 23324100];
-    //     const timestamp = Math.ceil(Date.now() / 1000);
-    //     await aeAggContract.$call('add_round_data', [prices, timestamp]);
+        const prices = [23320030, 23322500, 23324100];
+        const timestamp = Math.ceil(Date.now() / 1000);
+        await aeAggContract.$call('add_round_data', [prices, timestamp]);
 
-    //     const { decodedResult } = await aeAggContract.$call('latest_round_data', []);
-    //     assert.notEqual(decodedResult, 0);
-    //     console.log('lastest data ae: ', decodedResult);
-    // });
+        const { decodedResult } = await aeAggContract.$call('latest_round_data', []);
+        assert.notEqual(decodedResult, 0);
+        console.log('lastest data ae: ', decodedResult);
+    });
 
-    // it('Aggregator Example: get btc/ae price', async () => {
-    //     assert.notEqual(btcAggContract, null);
-    //     assert.notEqual(aeAggContract, null);
-    //     assert.notEqual(exContract, null);
-    //     assert.notEqual(aeSdk, null);
+    it('Aggregator Example: get btc/ae price', async () => {
+        assert.notEqual(btcAggContract, null);
+        assert.notEqual(aeAggContract, null);
+        assert.notEqual(exContract, null);
+        assert.notEqual(aeSdk, null);
 
-    //     if (!btcAggContract || !aeAggContract || !exContract || !aeSdk) return;
+        if (!btcAggContract || !aeAggContract || !exContract || !aeSdk) return;
 
-    //     const amount = 1_500_000;
-    //     const { decodedResult } = await exContract.$call('get_btc_slash_ae_price', [amount]);
-    //     assert.notEqual(decodedResult, 0);
+        const amount = 1_500_000;
+        const { decodedResult } = await exContract.$call('get_btc_slash_ae_price', [amount]);
+        assert.notEqual(decodedResult, 0);
 
-    //     console.log('amount: ', decodedResult);
-    // });
+        console.log('amount: ', decodedResult);
+    });
 
     let subscriptionId: number | null = null;
 
@@ -202,40 +202,40 @@ describe('Bitcoin/Ae Aggregator Example', () => {
             options
         );
 
-        // assert.notEqual(decodedResult, undefined);
+        assert.notEqual(decodedResult, undefined);
 
         console.log('query: ', decodedResult);
-        // query = decodedResult;
+        query = decodedResult;
     });
 
-    // it('Aggregator Example: respond ae all time high', async () => {
-    //     assert.notEqual(btcAggContract, null);
-    //     assert.notEqual(aeAggContract, null);
-    //     assert.notEqual(exContract, null);
-    //     assert.notEqual(aeSdk, null);
-    //     assert.notEqual(query, null);
+    it('Aggregator Example: respond ae all time high', async () => {
+        assert.notEqual(btcAggContract, null);
+        assert.notEqual(aeAggContract, null);
+        assert.notEqual(exContract, null);
+        assert.notEqual(aeSdk, null);
+        assert.notEqual(query, null);
 
-    //     if (!btcAggContract || !aeAggContract || !exContract || !aeSdk || !query) return;
+        if (!btcAggContract || !aeAggContract || !exContract || !aeSdk || !query) return;
 
-    //     const prices = [33320030, 33322500, 33324100];
-    //     const { decodedResult } = await aeAggContract.$call('respond', [query, prices]);
-    //     assert.notEqual(decodedResult, undefined);
+        const prices = [33320030, 33322500, 33324100];
+        const { decodedResult } = await aeAggContract.$call('respond', [query, prices]);
+        assert.notEqual(decodedResult, undefined);
 
-    //     console.log('reply: ', decodedResult);
-    // });
+        console.log('reply: ', decodedResult);
+    });
 
-    // it('Aggregator Example: get response ae all time high', async () => {
-    //     assert.notEqual(btcAggContract, null);
-    //     assert.notEqual(aeAggContract, null);
-    //     assert.notEqual(exContract, null);
-    //     assert.notEqual(aeSdk, null);
-    //     assert.notEqual(query, null);
+    it('Aggregator Example: get response ae all time high', async () => {
+        assert.notEqual(btcAggContract, null);
+        assert.notEqual(aeAggContract, null);
+        assert.notEqual(exContract, null);
+        assert.notEqual(aeSdk, null);
+        assert.notEqual(query, null);
 
-    //     if (!btcAggContract || !aeAggContract || !exContract || !aeSdk || !query) return;
+        if (!btcAggContract || !aeAggContract || !exContract || !aeSdk || !query) return;
 
-    //     const { decodedResult } = await exContract.$call('ae_usd_all_time_high', [query]);
-    //     assert.notEqual(decodedResult, undefined);
+        const { decodedResult } = await exContract.$call('ae_usd_all_time_high', [query]);
+        assert.notEqual(decodedResult, undefined);
 
-    //     console.log('response: ', decodedResult);
-    // });
+        console.log('response: ', decodedResult);
+    });
 });

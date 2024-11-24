@@ -98,7 +98,8 @@ payable contract Aggregator =
 
         let success = state.feaeder.use_subscription( subscription_id
                                                     , consumer
-                                                    , state.query_fee )
+                                                    , state.query_fee
+                                                    , protected = true )
 
         require(Option.force(success), "INVALID USE SUBSCRIPTION")
         

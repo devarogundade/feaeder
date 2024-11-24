@@ -1,39 +1,29 @@
 @compiler >= 6
 
-include "Option.aes"
-
 include "../interfaces/IVRF.aes"
 include "../interfaces/IVRFReceiver.aes"
 
 contract VRFExample : IVRFReceiver =
-    // ============== STATE/STORAGE ============== //
-    
     record state = {
         random_winner_idx: int,
         players: map(int, address),
         vrf: IVRF
-    }
+        }
 
-    // ============== INIT FUNCTION ============== //
+    stateful entrypoint init( vrf: IVRF ) = { random_winner_idx = 0
+                                            , players = {}
+                                            , vrf = vrf }
 
-    stateful entrypoint init( vrf: IVRF
-                            ) = { random_winner_idx = 0
-                                , players = {}
-                                , vrf = vrf
-                                }
-
-    payable stateful entrypoint pick_winner() =
-        let request_fees : option(int) = vrf.get_request_fees()
-
-        state.vrf.request_random_number(value = Option.force(request_fees))
+    payable stateful entrypoint pick_winner( subscription_id: int ) : int =
+        state.vrf.request_random_number( subscription_id
+                                       , protected = false )
         
-    // ============== CALLBACK FUNCTION ============== //
+    stateful entrypoint fulfill_random_number( request_id: int
+                                             , random_words: int ) : unit =
+        require(Call.caller == state.vrf.address, "UNAUTHORIZED CALLER")
 
-    stateful entrypoint fulfill_random_number: ( request_id: int,
-                                                 random_words: bytes(64)
-                                               ) =
-        require(Call.caller == state.vrf.address, "UNAUTHORIZED_CALLER")
+        put(state{ random_winner_idx = random_words })
 
-        put(state{ random_winner_idx = Bytes.to_int(random_words) })
+    entrypoint get_state(): state = state
         
 

@@ -1,5 +1,5 @@
 contract interface IVRF =
 
-  stateful entrypoint request_random_number: (int) => unit
+  stateful entrypoint request_random_number: (int) => int
 
   entrypoint get_request_fees: () => int

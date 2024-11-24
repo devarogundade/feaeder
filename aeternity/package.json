@@ -3,11 +3,10 @@
   "version": "1.0.0",
   "description": "This is the default package.json generated for your project",
   "scripts": {
-    "feaeder": "npx ts-node ./test/feaeder.ts",
     "deploy": "npx ts-node ./deploy/index.ts",
-    "deploy_vrf": "npx ts-node ./deploy/vrf/index.ts",
-    "test_btc_usd_aggregator": "npx ts-node ./test/btc_usd_aggregator.ts",
-    "test_aggregator_example": "npx ts-node ./test/aggregator_example.ts"
+    "test_vrf": "npx ts-node ./test/vrf.ts",
+    "test_feaeder": "npx ts-node ./test/feaeder.ts",
+    "test_aggregator": "npx ts-node ./test/aggregator.ts"
   },
   "dependencies": {
     "@aeternity/aepp-sdk": "^14.0.0",

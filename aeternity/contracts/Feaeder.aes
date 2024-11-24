@@ -101,8 +101,7 @@ contract Feaeder =
 
   stateful entrypoint use_subscription( subscription_id: int
                                       , consumer: address
-                                      , cost: int
-                                      ) : bool =
+                                      , cost: int ) : bool =
     require_allowed_contract()
 
     let subscription = state.subscriptions[subscription_id]
@@ -147,7 +146,7 @@ contract Feaeder =
     let subscription = state.subscriptions[subscription_id]
 
     let consumers = List.filter((consumer) => old_consumer != consumer 
-                               , subscription.consumers)
+                               , subscription.consumers )
     
     put(state{ subscriptions[subscription_id].consumers = consumers
              })
@@ -161,7 +160,7 @@ contract Feaeder =
 
     let new_allowed_contracts = List.insert_at(0
                                               , new_allowed_contract
-                                              , state.allowed_contracts)
+                                              , state.allowed_contracts )
 
     put(state { allowed_contracts = new_allowed_contracts 
               })

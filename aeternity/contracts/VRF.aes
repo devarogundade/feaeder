@@ -23,8 +23,8 @@ contract VRF =
 
     // ============== INIT FUNCTION ============== //
 
-    stateful entrypoint init( feaeder: IFeaeder,
-                              query_fee: int
+    stateful entrypoint init( feaeder: IFeaeder
+                            , query_fee: int
                             ) = { relayer = Call.caller
                                 , last_request_id = 0
                                 , feaeder = feaeder
@@ -32,29 +32,27 @@ contract VRF =
 
     // ============== MUTATIVE FUNCTIONS ============== //
 
-    stateful entrypoint request_random_number( subscription_id: int
-                                             ) =
+    stateful entrypoint request_random_number( subscription_id: int ) : int =
         let consumer = Call.caller
 
         let success = state.feaeder.use_subscription( subscription_id
                                                     , consumer
-                                                    , state.query_fee )
+                                                    , state.query_fee
+                                                    , protected = true )
 
         require(Option.force(success), "INVALID USE SUBSCRIPTION")
 
         let request_id = state.last_request_id + 1
         
-        put(state { last_request_id = request_id 
-                  })
+        put(state { last_request_id = request_id })
         
         Chain.event(RandomNumberRequested(request_id, consumer))
 
         request_id
 
-
     stateful entrypoint fulfill_random_number( request_id: int
                                              , receiver: IVRFReceiver
-                                             , random_words: bytes(64) ) =
+                                             , random_words: int ) =
         require_relayer()
 
         receiver.fulfill_random_number(request_id, random_words)
