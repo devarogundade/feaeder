@@ -71,4 +71,3 @@ jobs:
           slot-name: 'Production'
           package: .
           clean: true # This clears old files before deploying new ones
-          enable-diagnostics: true # Enables detailed logs
