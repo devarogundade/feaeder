@@ -53,8 +53,8 @@ const GbpUsdAg = {
                 address: tx.result?.contractId,
                 image: 'https://testnet.feaeder.xyz/images/gbp.png',
                 deviationThreshold: 0.15,
-                pulse: 600_000,
-                heartbeat: 1_200_000,
+                pulse: 320_000,
+                heartbeat: 5_000_000,
                 updatedAt: Date.now(),
                 name: "GBP / USD",
                 sources: {

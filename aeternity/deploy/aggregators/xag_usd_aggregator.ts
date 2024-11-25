@@ -53,7 +53,7 @@ const XagUsdAg = {
                 address: tx.result?.contractId,
                 image: 'https://testnet.feaeder.xyz/images/xag.png',
                 deviationThreshold: 0.3,
-                pulse: 600_000,
+                pulse: 320_000,
                 heartbeat: 1_200_000,
                 updatedAt: Date.now(),
                 name: "XAG / USD",

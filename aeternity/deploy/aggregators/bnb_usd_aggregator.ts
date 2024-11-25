@@ -53,8 +53,8 @@ const BnbUsdAg = {
                 address: tx.result?.contractId,
                 image: 'https://testnet.feaeder.xyz/images/bnb.png',
                 deviationThreshold: 1,
-                pulse: 120_000,
-                heartbeat: 720_000,
+                pulse: 200_000,
+                heartbeat: 5_000_000,
                 updatedAt: Date.now(),
                 name: "BNB / USD",
                 sources: {

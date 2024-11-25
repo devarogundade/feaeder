@@ -54,7 +54,7 @@ const UniUsdAg = {
                 image: 'https://testnet.feaeder.xyz/images/uni.png',
                 deviationThreshold: 1,
                 pulse: 320_000,
-                heartbeat: 720_000,
+                heartbeat: 5_000_000,
                 updatedAt: Date.now(),
                 name: "UNI / USD",
                 sources: {

@@ -53,7 +53,7 @@ const EurUsdAg = {
                 address: tx.result?.contractId,
                 image: 'https://testnet.feaeder.xyz/images/eur.png',
                 deviationThreshold: 0.15,
-                pulse: 600_000,
+                pulse: 320_000,
                 heartbeat: 1_200_000,
                 updatedAt: Date.now(),
                 name: "EUR / USD",

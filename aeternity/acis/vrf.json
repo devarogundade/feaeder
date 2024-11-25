@@ -1,1 +1,191 @@
-[{"namespace":{"name":"Option","typedefs":[]}},{"namespace":{"name":"ListInternal","typedefs":[]}},{"namespace":{"name":"List","typedefs":[]}},{"namespace":{"name":"String","typedefs":[]}},{"contract":{"functions":[{"arguments":[{"name":"_1","type":"int"},{"name":"_2","type":"address"},{"name":"_3","type":"int"}],"name":"use_subscription","payable":false,"returns":{"option":["bool"]},"stateful":true}],"kind":"contract_interface","name":"IFeaeder","payable":false,"typedefs":[]}},{"contract":{"functions":[{"arguments":[{"name":"_1","type":"int"},{"name":"_2","type":{"bytes":64}}],"name":"fulfill_random_number","payable":false,"returns":"unit","stateful":true}],"kind":"contract_interface","name":"IVRFReceiver","payable":false,"typedefs":[]}},{"contract":{"event":{"variant":[{"RandomNumberRequested":["int","address"]},{"RandomNumberFulfilled":["int"]}]},"functions":[{"arguments":[{"name":"feaeder","type":"IFeaeder"},{"name":"query_fee","type":"int"}],"name":"init","payable":false,"returns":"VRF.state","stateful":true},{"arguments":[{"name":"subscription_id","type":"int"}],"name":"request_random_number","payable":false,"returns":"int","stateful":true},{"arguments":[{"name":"request_id","type":"int"},{"name":"receiver","type":"IVRFReceiver"},{"name":"random_words","type":{"bytes":64}}],"name":"fulfill_random_number","payable":false,"returns":{"tuple":[]},"stateful":true},{"arguments":[],"name":"get_request_fees","payable":false,"returns":"int","stateful":false},{"arguments":[],"name":"get_state","payable":false,"returns":"VRF.state","stateful":false}],"kind":"contract_main","name":"VRF","payable":false,"state":{"record":[{"name":"relayer","type":"address"},{"name":"last_request_id","type":"int"},{"name":"feaeder","type":"IFeaeder"},{"name":"query_fee","type":"int"}]},"typedefs":[]}}]
+[
+  {
+    "namespace": {
+      "name": "Option",
+      "typedefs": []
+    }
+  },
+  {
+    "namespace": {
+      "name": "ListInternal",
+      "typedefs": []
+    }
+  },
+  {
+    "namespace": {
+      "name": "List",
+      "typedefs": []
+    }
+  },
+  {
+    "namespace": {
+      "name": "String",
+      "typedefs": []
+    }
+  },
+  {
+    "contract": {
+      "functions": [
+        {
+          "arguments": [
+            {
+              "name": "_1",
+              "type": "int"
+            },
+            {
+              "name": "_2",
+              "type": "address"
+            },
+            {
+              "name": "_3",
+              "type": "int"
+            }
+          ],
+          "name": "use_subscription",
+          "payable": false,
+          "returns": "bool",
+          "stateful": true
+        }
+      ],
+      "kind": "contract_interface",
+      "name": "IFeaeder",
+      "payable": false,
+      "typedefs": []
+    }
+  },
+  {
+    "contract": {
+      "functions": [
+        {
+          "arguments": [
+            {
+              "name": "_1",
+              "type": "int"
+            },
+            {
+              "name": "_2",
+              "type": "int"
+            }
+          ],
+          "name": "fulfill_random_number",
+          "payable": false,
+          "returns": "unit",
+          "stateful": true
+        }
+      ],
+      "kind": "contract_interface",
+      "name": "IVRFReceiver",
+      "payable": false,
+      "typedefs": []
+    }
+  },
+  {
+    "contract": {
+      "event": {
+        "variant": [
+          {
+            "RandomNumberRequested": [
+              "int",
+              "address"
+            ]
+          },
+          {
+            "RandomNumberFulfilled": [
+              "int"
+            ]
+          }
+        ]
+      },
+      "functions": [
+        {
+          "arguments": [
+            {
+              "name": "feaeder",
+              "type": "IFeaeder"
+            },
+            {
+              "name": "query_fee",
+              "type": "int"
+            }
+          ],
+          "name": "init",
+          "payable": false,
+          "returns": "VRF.state",
+          "stateful": true
+        },
+        {
+          "arguments": [
+            {
+              "name": "subscription_id",
+              "type": "int"
+            }
+          ],
+          "name": "request_random_number",
+          "payable": false,
+          "returns": "int",
+          "stateful": true
+        },
+        {
+          "arguments": [
+            {
+              "name": "request_id",
+              "type": "int"
+            },
+            {
+              "name": "receiver",
+              "type": "IVRFReceiver"
+            },
+            {
+              "name": "random_words",
+              "type": "int"
+            }
+          ],
+          "name": "fulfill_random_number",
+          "payable": false,
+          "returns": {
+            "tuple": []
+          },
+          "stateful": true
+        },
+        {
+          "arguments": [],
+          "name": "get_request_fees",
+          "payable": false,
+          "returns": "int",
+          "stateful": false
+        },
+        {
+          "arguments": [],
+          "name": "get_state",
+          "payable": false,
+          "returns": "VRF.state",
+          "stateful": false
+        }
+      ],
+      "kind": "contract_main",
+      "name": "VRF",
+      "payable": false,
+      "state": {
+        "record": [
+          {
+            "name": "relayer",
+            "type": "address"
+          },
+          {
+            "name": "last_request_id",
+            "type": "int"
+          },
+          {
+            "name": "feaeder",
+            "type": "IFeaeder"
+          },
+          {
+            "name": "query_fee",
+            "type": "int"
+          }
+        ]
+      },
+      "typedefs": []
+    }
+  }
+]

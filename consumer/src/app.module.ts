@@ -12,7 +12,7 @@ import { ConsumerRequestWorker } from './workers/consumer-request';
 import { VRFWorker } from './workers/vrf';
 import { Datafeed, DatafeedSchema } from './database/schemas/datafeed';
 import { Aggregator, AggregatorSchema } from './database/schemas/aggregator';
-
+import { TrasherWorker } from './workers/trasher';
 @Module({
   imports: [
     // Load environment variables from .env file for configuration
@@ -21,8 +21,8 @@ import { Aggregator, AggregatorSchema } from './database/schemas/aggregator';
     // Configure BullMQ for task queue processing, connecting to Redis server
     BullModule.forRoot({
       connection: {
-        host: process.env.REDIS_HOST, // Redis host from environment variable
-        port: parseInt(process.env.REDIS_PORT, 10) // Redis port, parsed as integer
+        host: process.env.REDIS_HOST,
+        port: Number(process.env.REDIS_PORT)
       }
     }),
 
@@ -30,6 +30,7 @@ import { Aggregator, AggregatorSchema } from './database/schemas/aggregator';
     BullModule.registerQueue({ name: 'ConsumerWorker' }),
     BullModule.registerQueue({ name: 'ConsumerRequestWorker' }),
     BullModule.registerQueue({ name: 'VRFWorker' }),
+    BullModule.registerQueue({ name: 'TrasherWorker' }),
 
     // Configure Mongoose to connect to MongoDB using URL from environment variables
     MongooseModule.forRoot(process.env.MONGO_URL),
@@ -45,7 +46,13 @@ import { Aggregator, AggregatorSchema } from './database/schemas/aggregator';
   controllers: [AppController],
 
   // Define service and worker providers used in this module
-  providers: [AppService, ConsumerWorker, ConsumerRequestWorker, VRFWorker],
+  providers: [
+    AppService,
+    ConsumerWorker,
+    ConsumerRequestWorker,
+    VRFWorker,
+    TrasherWorker
+  ],
 })
 
 export class AppModule { }

@@ -53,13 +53,14 @@ const AeUsdAg = {
                 address: tx.result?.contractId,
                 image: 'https://testnet.feaeder.xyz/images/ae.png',
                 deviationThreshold: 0.5,
-                pulse: 600_000,
-                heartbeat: 1_000_000,
+                pulse: 1_200_000,
+                heartbeat: 5_000_000,
                 updatedAt: Date.now(),
                 name: "AE / USD",
                 sources: {
                     cmc: ["AE", "USD"],
-                    coingecko: ["aeternity", "usd"]
+                    coingecko: ["aeternity", "usd"],
+                    birdeye: ["ethereum", "0xCa781A1779c8f363f7F82BF6f4B406e5d54bAE1F"]
                 },
                 description: DESCRIPTION,
                 category: "crypto",

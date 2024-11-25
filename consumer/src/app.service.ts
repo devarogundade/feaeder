@@ -23,10 +23,22 @@ export class AppService {
     // Inject BullMQ aggregatorQueue for managing consumer jobs
     @InjectQueue('ConsumerWorker') private aggregatorQueue: Queue,
     @InjectQueue('VRFWorker') private vrfRequestQueue: Queue,
-    @InjectQueue('ConsumerRequestWorker') private aggregatorRequestQueue: Queue
+    @InjectQueue('ConsumerRequestWorker') private aggregatorRequestQueue: Queue,
+    @InjectQueue('TrasherWorker') private trasherQueue: Queue
   ) {
     // Initialize scheduled jobs for aggregators when the service starts
     this.start();
+
+    const jobOptions: JobsOptions = {
+      repeat: {
+        every: 24 * 60 * 60 * 1000
+      },
+      jobId: 'trashers-1' // Unique job ID to prevent duplicates
+    };
+
+    this.trasherQueue.add('trashers-1', {},
+      jobOptions
+    );
   }
 
   // Method to restart jobs for all aggregators

@@ -53,13 +53,13 @@ const EthUsdAg = {
                 address: tx.result?.contractId,
                 image: 'https://testnet.feaeder.xyz/images/eth.png',
                 deviationThreshold: 2,
-                pulse: 120_000,
-                heartbeat: 720_000,
+                pulse: 1_200_000,
+                heartbeat: 5_000_000,
                 updatedAt: Date.now(),
                 name: "ETH / USD",
                 sources: {
-                    // cmc: ["ETH", "USD"],
-                    // coingecko: ["ethereum", "usd"],
+                    cmc: ["ETH", "USD"],
+                    coingecko: ["ethereum", "usd"],
                     chainlink: ["https://eth.llamarpc.com", "0x5f4eC3Df9cbd43714FE2740f5E3616155c5b8419"]
                 },
                 description: DESCRIPTION,

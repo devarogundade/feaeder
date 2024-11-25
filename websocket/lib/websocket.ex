@@ -1,29 +1,46 @@
 defmodule Websocket.Main do
-  @moduledoc """
-  A WebSocket client that listens for messages and processes them.
-  """
   use WebSockex
 
-  @ws_url Application.compile_env(:websocket, :ws_url)
-  @aggregators Application.compile_env(:websocket, :aggregators)
   @vrfs Application.compile_env(:websocket, :vrfs)
+  @aggregators Application.compile_env(:websocket, :aggregators)
   @consumer_url Application.compile_env(:websocket, :consumer_url)
 
   # Start the WebSocket connection
-  def start_link() do
+  def start_link(ws_url) do
     WebSockex.start_link(
-      @ws_url,
+      ws_url,
       __MODULE__,
-      %{}
+      %{},
+      timeout: 20000
     )
+
+    if Process.whereis(Websocket.Main) do
+      IO.puts("Websocket.Main process is running.")
+    else
+      IO.puts("Websocket.Main process is not running.")
+    end
+  end
+
+  # Define child_spec for compatibility with supervision trees
+  def child_spec(arg) do
+    %{
+      id: __MODULE__,
+      start: {__MODULE__, :start_link, [arg]},
+      type: :worker,
+      restart: :permanent
+    }
+  end
+
+  def terminate(reason, _state) do
+    IO.puts("WebSocket terminated: #{inspect(reason)}")
   end
 
   # Handle WebSocket connection success
   def handle_connect(_conn, state) do
     IO.puts("WebSocket Client Connected")
 
-    @aggregators
-    |> Enum.each(&send_subscription_request/1)
+    # @aggregators
+    # |> Enum.each(&send_subscription_request/1)
 
     {:ok, state}
   end
@@ -63,7 +80,7 @@ defmodule Websocket.Main do
       }
       |> Jason.encode!()
 
-    WebSockex.send_frame(__MODULE__, subscription_request)
+    WebSockex.send_frame(__MODULE__, {:text, subscription_request})
   end
 
   # Fetch transaction info from external API
@@ -78,6 +95,7 @@ defmodule Websocket.Main do
               case log do
                 [%{"topics" => [_ | [current_query_index]]} | _] ->
                   process_query_index(current_query_index, state)
+
                 _ ->
                   :ok
               end

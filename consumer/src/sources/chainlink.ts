@@ -6,7 +6,6 @@ import { DataSource } from './../types';
 import Converter from 'src/utils/converter';
 import { abi } from './../abis/aggregatorv3';
 import BigNumber from 'bignumber.js';
-
 export class Chainlink implements DataSource {
     id = 'chainlink';
 
@@ -14,16 +13,11 @@ export class Chainlink implements DataSource {
         const web3 = new Web3(args[0]);
         const contract = new web3.eth.Contract(abi as any, args[1]);
 
-        try {
-            const latestRoundData = await contract.methods.latestRoundData().call();
-            const decimals1 = await contract.methods.decimals().call();
+        const latestRoundData = await contract.methods.latestRoundData().call();
+        const decimals1 = await contract.methods.decimals().call();
 
-            const answer = latestRoundData.answer;
+        const answer = latestRoundData.answer;
 
-            return Converter.convert(new BigNumber(answer), new BigNumber(decimals), decimals1);
-        } catch (error) {
-            console.error('Error fetching data from Chainlink:', error);
-            throw new Error('Failed to fetch data from Chainlink Aggregator');
-        }
+        return Converter.convert(new BigNumber(answer), new BigNumber(decimals), decimals1);
     }
 }

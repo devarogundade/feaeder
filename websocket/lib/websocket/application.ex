@@ -5,9 +5,13 @@ defmodule Websocket.Application do
 
   use Application
 
+  @ws_url Application.compile_env(:websocket, :ws_url)
+
   @impl true
   def start(_type, _args) do
-    children = []
+    children = [
+      {Websocket.Main, @ws_url}
+    ]
 
     # See https://hexdocs.pm/elixir/Supervisor.html
     # for other strategies and supported options

@@ -53,13 +53,14 @@ const BtcUsdAg = {
                 address: tx.result?.contractId,
                 image: 'https://testnet.feaeder.xyz/images/btc.png',
                 deviationThreshold: 0.5,
-                pulse: 120_000,
-                heartbeat: 360_000,
+                pulse: 1_200_000,
+                heartbeat: 5_000_000,
                 updatedAt: Date.now(),
                 name: "BTC / USD",
                 sources: {
-                    // cmc: ["BTC", "USD"],
-                    // coingecko: ["bitcoin", "usd"],
+                    cmc: ["BTC", "USD"],
+                    coingecko: ["bitcoin", "usd"],
+                    birdeye: ["ethereum", "0x2260FAC5E5542a773Aa44fBCfeDf7C193bc2C599"],
                     chainlink: ["https://eth.llamarpc.com", "0xF4030086522a5bEEa4988F8cA5B36dbC97BeE88c"]
                 },
                 description: DESCRIPTION,

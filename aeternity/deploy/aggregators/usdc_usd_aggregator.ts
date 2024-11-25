@@ -54,7 +54,7 @@ const UsdcUsdAg = {
                 image: 'https://testnet.feaeder.xyz/images/usdc.png',
                 deviationThreshold: 1,
                 pulse: 200_000,
-                heartbeat: 720_000,
+                heartbeat: 5_000_000,
                 updatedAt: Date.now(),
                 name: "USDC / USD",
                 sources: {

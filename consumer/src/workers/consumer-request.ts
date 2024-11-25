@@ -7,21 +7,14 @@ import { InjectModel } from '@nestjs/mongoose';
 import { Job } from 'bullmq';
 import { Model } from 'mongoose';
 import { Aggregator } from 'src/database/schemas/aggregator';
-import { Chainlink } from 'src/sources/chainlink';
-import { CMC } from 'src/sources/cmc';
-import { CoinGecko } from 'src/sources/coingecko';
 import { AggregatorJobData, AggregatorQuestionType, FetchedAnswer } from 'src/types';
 import { getSdk } from 'src/utils/aeternity';
 import { aci } from 'src/acis/aggregator';
+import { SourceBuilder } from 'src/utils/source-builder';
 
 // The ConsumerRequestWorker class processes jobs related to data aggregation and blockchain updates
 @Processor('ConsumerRequestWorker')
 export class ConsumerRequestWorker extends WorkerHost {
-    // Instantiating sources to fetch data from
-    private cmc = new CMC();
-    private coinGecko = new CoinGecko();
-    private chainlink = new Chainlink();
-
     constructor(
         @InjectModel(Aggregator.name) private aggregatorModel: Model<Aggregator>
     ) {
@@ -56,29 +49,7 @@ export class ConsumerRequestWorker extends WorkerHost {
 
     // Fetches price data from external sources like CoinMarketCap and CoinGecko
     private async fetchAnswers(aggregator: Aggregator): Promise<FetchedAnswer> {
-        // Collecting sources to fetch data from based on the aggregator's tickers
-        const sources = [];
-
-        // If CoinMarketCap data is available for the aggregator, fetch the data
-        if (aggregator.sources[this.cmc.id]) {
-            sources.push(
-                this.cmc.fetchData(aggregator.sources[this.cmc.id], aggregator.decimals)
-            );
-        }
-
-        // If CoinGecko data is available for the aggregator, fetch the data
-        if (aggregator.sources[this.coinGecko.id]) {
-            sources.push(
-                this.coinGecko.fetchData(aggregator.sources[this.coinGecko.id], aggregator.decimals)
-            );
-        }
-
-        // If Chainlink data is available for the aggregator, fetch the data
-        if (aggregator.sources[this.chainlink.id]) {
-            sources.push(
-                this.chainlink.fetchData(aggregator.sources[this.chainlink.id], aggregator.decimals)
-            );
-        }
+        const sources = new SourceBuilder().build(aggregator);
 
         // Wait for all the sources to return data and package them with timestamp
         const answers = await Promise.all(sources);

@@ -53,8 +53,8 @@ const SolUsdAg = {
                 address: tx.result?.contractId,
                 image: 'https://testnet.feaeder.xyz/images/sol.png',
                 deviationThreshold: 1,
-                pulse: 220_000,
-                heartbeat: 720_000,
+                pulse: 320_000,
+                heartbeat: 5_000_000,
                 updatedAt: Date.now(),
                 name: "SOL / USD",
                 sources: {

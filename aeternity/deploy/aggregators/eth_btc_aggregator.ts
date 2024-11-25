@@ -53,11 +53,12 @@ const EthBtcAg = {
                 address: tx.result?.contractId,
                 image: 'https://testnet.feaeder.xyz/images/eth.png',
                 deviationThreshold: 0.5,
-                pulse: 600_000,
-                heartbeat: 1_200_000,
+                pulse: 1_200_000,
+                heartbeat: 5_000_000,
                 updatedAt: Date.now(),
                 name: "ETH / BTC",
                 sources: {
+                    cmc: ["ETH", "BTC"],
                     chainlink: ["https://eth.llamarpc.com", "0xAc559F25B1619171CbC396a50854A3240b6A4e99"]
                 },
                 description: DESCRIPTION,
