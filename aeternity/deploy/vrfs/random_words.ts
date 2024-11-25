@@ -27,7 +27,7 @@ const RandomWords = {
         // initialize the contract instance
         const contract = await Contract.initialize({ ...aeSdk.getContext(), sourceCode, fileSystem, verify: true });
         fs.mkdirSync('./acis', { recursive: true });
-        fs.writeFileSync('./acis/vrf.json', JSON.stringify(contract._aci));
+        fs.writeFileSync('./acis/vrf.json', JSON.stringify(contract._aci, null, 2));
 
         const args = [feaeder, QUERY_FEE] as any;
         const tx = await contract.$deploy(args);

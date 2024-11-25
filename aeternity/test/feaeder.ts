@@ -33,7 +33,7 @@ describe('Feaeder', () => {
     // initialize the contract instance
     contract = await Contract.initialize({ ...aeSdk.getContext(), sourceCode, fileSystem, verify: true });
     fs.mkdirSync('./acis', { recursive: true });
-    fs.writeFileSync('./acis/feaeder.json', JSON.stringify(contract._aci));
+    fs.writeFileSync('./acis/feaeder.json', JSON.stringify(contract._aci, null, 2));
 
     const args = [VERSION] as any;
 
