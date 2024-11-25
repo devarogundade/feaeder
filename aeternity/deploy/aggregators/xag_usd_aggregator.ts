@@ -44,7 +44,7 @@ const XagUsdAg = {
 
         if (!tx.result?.contractId) throw new Error('Failed to deploy');
 
-        const data = await fetch(`http://localhost:3000/add-aggregator`, {
+        const data = await fetch(`https://feaeder-consumer-h0e0gsemcpdrh5hr.canadacentral-01.azurewebsites.net/add-aggregator`, {
             method: 'POST',
             headers: {
                 'Content-Type': 'application/json'
