@@ -21,8 +21,13 @@ import { TrasherWorker } from './workers/trasher';
     // Configure BullMQ for task queue processing, connecting to Redis server
     BullModule.forRoot({
       connection: {
+        username: process.env.REDIS_USERNAME,
         host: process.env.REDIS_HOST,
-        port: Number(process.env.REDIS_PORT)
+        port: Number(process.env.REDIS_PORT),
+        password: process.env.REDIS_PASSWORD,
+        connectTimeout: 10000,
+        retryStrategy: (times) => Math.min(times * 50, 2000),
+        tls: {}
       }
     }),
 
