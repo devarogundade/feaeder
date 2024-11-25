@@ -19,7 +19,7 @@ contract AggregatorExample =
 
         (btc_data.answer * amount) / ae_data.answer
 
-    payable stateful entrypoint ask_ae_usd_all_time_high( subscription_id: int
+    payable stateful entrypoint ask_ae_price( subscription_id: int
                                                         , question: string ): oracle_query(string, string) =
         state.ae_usdt_agg.create_query( subscription_id
                                       , question

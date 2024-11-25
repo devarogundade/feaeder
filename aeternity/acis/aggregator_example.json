@@ -198,7 +198,7 @@
                             "type": "string"
                         }
                     ],
-                    "name": "ask_ae_usd_all_time_high",
+                    "name": "ask_ae_price",
                     "payable": true,
                     "returns": {
                         "option": [

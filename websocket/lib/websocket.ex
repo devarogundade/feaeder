@@ -7,6 +7,7 @@ defmodule Websocket.Main do
   @ws_url Application.compile_env(:websocket, :ws_url)
   @aggregators Application.compile_env(:websocket, :aggregators)
   @vrfs Application.compile_env(:websocket, :vrfs)
+  @consumer_url Application.compile_env(:websocket, :consumer_url)
 
   # Start the WebSocket connection
   def start_link() do
@@ -62,7 +63,7 @@ defmodule Websocket.Main do
       }
       |> Jason.encode!()
 
-    WebSockex.send_frame(__MODULE__, {:text, subscription_request})
+    WebSockex.send_frame(__MODULE__, subscription_request)
   end
 
   # Fetch transaction info from external API

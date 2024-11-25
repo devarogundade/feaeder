@@ -4,7 +4,7 @@ import { Body, Controller, Get, Param, Post, Query } from '@nestjs/common';  // 
 import { AppService } from './app.service';  // Service layer to handle business logic
 import { Aggregator } from './database/schemas/aggregator';  // Aggregator schema model for DB operations
 import { Datafeed } from './database/schemas/datafeed';  // Datafeed schema model for DB operations
-import { Paged, VRFJobData } from './types';  // Paged type for paginated responses
+import { AggregatorJobData, Paged, VRFJobData } from './types';  // Paged type for paginated responses
 
 @Controller()  // NestJS controller that maps incoming requests to methods
 export class AppController {
@@ -61,9 +61,9 @@ export class AppController {
 
   @Post('/aggregators/request')
   requestAggregator(
-    @Body() jobData: VRFJobData
+    @Body() jobData: AggregatorJobData
   ): Promise<void> {
-    return this.appService.requestVRF(jobData);
+    return this.appService.requestAggregator(jobData);
   }
 
   @Post('/vrf/request')

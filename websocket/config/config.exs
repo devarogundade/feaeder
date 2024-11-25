@@ -8,4 +8,5 @@ config :websocket,
   ],
   vrfs: [
     ""
-  ]
+  ],
+  consumer_url: ""

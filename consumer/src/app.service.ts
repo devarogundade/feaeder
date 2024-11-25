@@ -22,7 +22,7 @@ export class AppService {
 
     // Inject BullMQ aggregatorQueue for managing consumer jobs
     @InjectQueue('ConsumerWorker') private aggregatorQueue: Queue,
-    @InjectQueue('VRFWorker') private vrfQueue: Queue,
+    @InjectQueue('VRFWorker') private vrfRequestQueue: Queue,
     @InjectQueue('ConsumerRequestWorker') private aggregatorRequestQueue: Queue
   ) {
     // Initialize scheduled jobs for aggregators when the service starts
@@ -92,7 +92,7 @@ export class AppService {
         }
       },
       { $unwind: '$datafeeds' },
-      { $sort: { 'aggregator.name': 1, 'datafeeds.timestamp': -1 } },
+      { $sort: { 'datafeeds.timestamp': -1 } },
       {
         $group: {
           _id: '$_id',
@@ -101,6 +101,7 @@ export class AppService {
         }
       },
       { $replaceRoot: { newRoot: { $mergeObjects: ['$root', { latestDataFeed: '$latestDataFeed' }] } } },
+      { $sort: { name: 1 } },
       { $skip: (page - 1) * TAKE_SIZE },
       { $limit: TAKE_SIZE }
     ]).exec();
@@ -188,7 +189,7 @@ export class AppService {
       jobId // Unique job ID to avoid duplicate jobs
     };
 
-    this.vrfQueue.add(jobId, jobData,
+    this.vrfRequestQueue.add(jobId, jobData,
       jobOptions
     );
   }

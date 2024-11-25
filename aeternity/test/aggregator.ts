@@ -197,7 +197,7 @@ describe('Bitcoin/Ae Aggregator Example', () => {
         const options = { omitUnknown: true, txEvents: true };
 
         const { decodedResult } = await exContract.$call(
-            'ask_ae_usd_all_time_high',
+            'ask_ae_price',
             [subscriptionId, question],
             options
         );
