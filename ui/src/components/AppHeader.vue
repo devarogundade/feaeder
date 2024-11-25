@@ -93,7 +93,7 @@ const connect = async () => {
 
 <style scoped>
 section {
-    background: var(--white);
+    background: var(--accent);
     position: sticky;
     top: 0;
     z-index: 1;
@@ -136,7 +136,7 @@ header {
     height: 100%;
     padding: 0 20px;
     border: none;
-    background: var(--white);
+    background: var(--accent);
     border-left: 1px solid var(--bg-darkest);
     color: var(--tx-normal);
     font-size: 16px;
@@ -176,7 +176,7 @@ header {
     height: 40px;
     border-radius: 4px;
     border: 1px solid var(--bg-darkest);
-    background: var(--white);
+    background: var(--accent);
     padding: 0 10px;
 }
 

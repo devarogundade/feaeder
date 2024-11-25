@@ -38,7 +38,7 @@
   --tooltip-bg: #fff6fc;
 
   --sm-red: #F06979;
-  --white: #FFFFFF;
+  --accent: #FFFFFF;
 }
 
 [data-theme="dark"] {
@@ -57,5 +57,5 @@
   --tooltip-bg: #6b1424;
 
   --sm-red: #F06979;
-  --white: rgba(16, 16, 14, 1);
+  --accent: rgba(16, 16, 14, 1);
 }

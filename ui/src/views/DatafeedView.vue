@@ -269,7 +269,7 @@ watch(interval, () => {
     font-size: 12px;
     font-weight: 400;
     color: var(--tx-semi);
-    background: var(--white);
+    background: var(--accent);
     text-transform: capitalize;
 }
 
@@ -278,7 +278,7 @@ watch(interval, () => {
     width: 100%;
     display: grid;
     grid-template-columns: 1fr auto;
-    background: var(--white);
+    background: var(--accent);
     border: 1px solid var(--bg-darkest);
     border-radius: 4px;
 }
@@ -372,6 +372,6 @@ watch(interval, () => {
 .chart_tools .interval_active {
     border: 1px solid var(--primary);
     color: var(--primary);
-    background: var(--white);
+    background: var(--accent);
 }
 </style>

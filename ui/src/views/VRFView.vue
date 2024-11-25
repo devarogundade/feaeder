@@ -285,7 +285,7 @@ section {
 }
 
 .tbody .tr {
-    background: var(--white);
+    background: var(--accent);
     border: 1px solid var(--bg-darkest);
     border-radius: 4px;
     margin-bottom: 10px;
