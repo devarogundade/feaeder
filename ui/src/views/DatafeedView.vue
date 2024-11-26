@@ -124,7 +124,9 @@ watch(interval, () => {
                                 {{ symbol }}
                                 {{ Converter.toMoney(
                                     Converter.down(
-                                        Converter.getAverage(datafeeds[0].answers.map(a => new BigNumber(a))),
+                                        Converter.getAverage(datafeeds[
+                                            datafeeds.length - 1
+                                        ].answers.map(a => new BigNumber(a))),
                                         aggregator.decimals
                                     )
                                 ) }}</h3>
