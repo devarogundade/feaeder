@@ -55,6 +55,12 @@ textarea {
   filter: brightness(50%);
 }
 
+[data-theme="dark"] {
+  .empty img {
+    filter: brightness(100%);
+  }
+}
+
 .empty button {
   padding: 0 16px;
   border-radius: 4px;
