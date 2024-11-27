@@ -3,18 +3,15 @@ import CopyIcon from '@/components/icons/CopyIcon.vue';
 import { fetchAggregators } from '@/scripts/consumer';
 import Converter from '@/scripts/converter';
 import { FeedsType, type Aggregator, type FeedsCategory } from '@/types';
-import { onMounted, ref, watch } from 'vue';
-import { useWalletStore } from '@/stores/wallet';
+import { onMounted, ref } from 'vue';
 import { useToast } from 'vue-toast-notification';
 import 'vue-toast-notification/dist/theme-sugar.css';
 import BigNumber from 'bignumber.js';
-import { useUserStore } from '@/stores/user';
 import CoinIcon from '@/components/icons/CoinIcon.vue';
 import FiatIcon from '@/components/icons/FiatIcon.vue';
 import CommodityIcon from '@/components/icons/CommodityIcon.vue';
 import RWAIcon from '@/components/icons/RWAIcon.vue';
 import InfoIcon from '@/components/icons/InfoIcon.vue';
-import TicketIcon from '@/components/icons/TicketIcon.vue';
 import ProgressBox from '@/components/ProgressBox.vue';
 import ToolTip from '@/components/ToolTip.vue';
 import TimeDown from '@/components/TimeDown.vue';
@@ -27,7 +24,6 @@ const aggregators = ref<Aggregator[]>([]);
 const toast = useToast({ duration: 4000, position: 'top', dismissible: true });
 const category = ref<FeedsCategory | null>(null);
 const type = ref(FeedsType.Push);
-const walletStore = useWalletStore();
 const fetchingAggregators = ref(false);
 
 const selectCategory = (newCategory: string) => {
