@@ -38,4 +38,14 @@ footer p {
     font-weight: 500;
     color: var(--tx-semi);
 }
+
+@media screen and (max-width: 768px) {
+    section {
+        height: 40px;
+    }
+
+    footer p {
+        font-size: 12px;
+    }
+}
 </style>

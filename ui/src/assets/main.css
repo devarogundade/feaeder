@@ -89,3 +89,10 @@ input[type="number"] {
   justify-content: center;
   height: 400px;
 }
+
+@media screen and (width: 1200px) {
+  .modal {
+    height: 100vh;
+    overflow-y: hidden;
+  }
+}

@@ -369,6 +369,7 @@ section {
   gap: 16px;
   align-items: center;
   margin-top: 30px;
+  flex-wrap: wrap;
 }
 
 .filter {
@@ -429,6 +430,7 @@ section {
 .table {
   margin-top: 30px;
   width: 100%;
+  overflow-x: auto;
 }
 
 .name {
@@ -441,6 +443,8 @@ section {
   font-size: 14px;
   color: var(--tx-normal);
   font-weight: 500;
+  width: 100%;
+  min-width: 1200px;
 }
 
 .tr {
@@ -473,6 +477,8 @@ section {
   font-size: 14px;
   color: var(--tx-semi);
   font-weight: 500;
+  width: 100%;
+  min-width: 1200px;
 }
 
 .tbody .tr {
@@ -534,5 +540,76 @@ a p {
 .pagination p {
   font-size: 14px;
   color: var(--tx-semi);
+  text-align: center;
+}
+
+@media screen and (max-width: 768px) {
+  section {
+    padding-top: 30px;
+  }
+
+  .tr {
+    display: grid;
+    grid-template-columns: 0.8fr 0.6fr 1fr 1fr 0.8fr 0.6fr 0.3fr;
+    align-items: center;
+    height: 50px;
+  }
+
+  .subscription .tr {
+    grid-template-columns: 1fr 1.2fr 2fr 0.6fr 0.8fr 1.5fr;
+  }
+
+  .hero h3 {
+    font-size: 24px;
+    line-height: 36px;
+  }
+
+  .hero p {
+    font-size: 16px;
+    line-height: 24px;
+    margin-top: 16px;
+    max-width: 100%;
+  }
+
+  .types {
+    margin-top: 20px;
+    overflow: hidden;
+    width: 100%;
+  }
+
+  .type {
+    width: 100%;
+  }
+
+
+  .filters {
+    gap: 10px;
+  }
+
+  .filter {
+    padding: 0 8px;
+    font-size: 12px;
+    height: 26px;
+    gap: 8px;
+  }
+
+  .filter svg {
+    width: 14px;
+    height: 14px;
+  }
+
+  .pagination {
+    margin-top: 20px;
+  }
+
+  .pagination button {
+    padding: 0 16px;
+    height: 30px;
+    font-size: 12px;
+  }
+
+  .pagination p {
+    font-size: 12px;
+  }
 }
 </style>
