@@ -8,9 +8,10 @@ const props = defineProps({
     data: { type: Object },
     marker: { type: Boolean },
     domain: { required: true },
-    symbol: { type: String }
+    symbol: { type: String },
+    width: { type: Number, required: true },
+    height: { type: Number, required: true }
 });
-
 const direction = ref<Direction>('horizontal');
 const margin = ref({
     left: 0,
@@ -22,6 +23,7 @@ const axis = ref<ChartAxis>({
     primary: {
         type: 'band',
         domain: ['dataMin', 'dataMax'],
+        hide: true
     },
     secondary: {
         domain: props.domain as any,
@@ -34,8 +36,8 @@ const axis = ref<ChartAxis>({
 </script>
 
 <template>
-    <Chart :size="{ width: 800, height: 550 }" style="color: var(--tx-semi);" :data="(props.data as any)"
-        :margin="margin" :direction="direction" :axis="axis">
+    <Chart ref="chartRef" :size="{ width: props.width, height: props.height }" style="color: var(--tx-semi);"
+        :data="(props.data as any)" :margin="margin" :direction="direction" :axis="axis">
 
         <template #layers>
             <Grid :stroke-dasharray="'2,2'" :hide-y="true" />

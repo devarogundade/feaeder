@@ -64,13 +64,7 @@ const getDatafeeds = async () => {
             if (answer > maxData.value) maxData.value = answer;
 
             return {
-                name: Intl.DateTimeFormat('en-US', {
-                    hour: '2-digit',
-                    second: '2-digit',
-                    minute: '2-digit',
-                    hour12: false
-                }).format(new Date(m.timestamp)),
-
+                name: m.timestamp.toString(),
                 answer
             };
         });
@@ -100,7 +94,7 @@ watch(interval, () => {
                         <h3>Data Feeds</h3>
                     </RouterLink>
                     <ArrowRightIcon />
-                    <h3>{{ Converter.toChecksumAddress(route.params.id.toString(), 10) }}</h3>
+                    <h3>{{ Converter.toChecksumAddress(route.params.id.toString(), 4) }}</h3>
                     <button>
                         <CopyIcon />
                     </button>
@@ -196,7 +190,7 @@ watch(interval, () => {
                                     @click="interval = '1m'">1M</button>
                             </div>
                         </div>
-                        <Chart :data="chartData" :domain="[
+                        <Chart :width="800" :height="550" :data="chartData" :domain="[
                             minData - (0.02 * minData),
                             maxData + (0.02 * maxData)
                         ]" :marker="true" :symbol="symbol" />
@@ -208,7 +202,7 @@ watch(interval, () => {
 </template>
 
 <style scoped>
-.datafeeds {
+section {
     padding-top: 60px;
     padding-bottom: 100px;
 }
@@ -226,7 +220,7 @@ watch(interval, () => {
 .title h3 {
     font-size: 20px;
     color: var(--tx-normal);
-    font-weight: 5;
+    font-weight: 500;
 }
 
 .title button {
@@ -310,6 +304,7 @@ watch(interval, () => {
     align-items: center;
     gap: 10px;
     margin-top: 10px;
+    flex-wrap: wrap;
 }
 
 .images img {
@@ -351,6 +346,7 @@ watch(interval, () => {
 .chart_data {
     background: var(--bg-dark);
     padding: 30px 0 30px 30px;
+    overflow: auto;
 }
 
 .chart_tools {
@@ -382,5 +378,79 @@ watch(interval, () => {
     border: 1px solid var(--primary);
     color: var(--primary);
     background: var(--accent);
+}
+
+@media screen and (max-width: 768px) {
+    section {
+        padding-top: 30px;
+    }
+
+    .title {
+        gap: 10px;
+    }
+
+    .title h3 {
+        font-size: 14px;
+    }
+
+
+    .info {
+        margin-top: 16;
+    }
+
+    .info img {
+        width: 20px;
+        height: 20px;
+    }
+
+    .info p {
+        font-size: 16px;
+    }
+
+    .info .description {
+        font-size: 12px;
+        margin-top: 18x;
+    }
+
+    .info .category {
+        margin-top: 10px;
+        height: 30px;
+        padding: 0 10px;
+        gap: 8px;
+        font-size: 10px;
+    }
+
+    .details {
+        margin-top: 20px;
+        display: grid;
+        grid-template-columns: 1fr;
+    }
+
+    .parameters {
+        padding: 16px;
+    }
+
+    .parameter {
+        min-height: 80px;
+        padding: 10px 0;
+    }
+
+    .images {
+        gap: 8px;
+    }
+
+    .images img {
+        width: 20px;
+        height: 20px;
+    }
+
+    .parameter p {
+        font-size: 12px;
+    }
+
+    .parameter h3 {
+        font-size: 14px;
+    }
+
 }
 </style>
