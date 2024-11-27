@@ -5,7 +5,6 @@ import Converter from '@/scripts/converter';
 import { FeedsType, type Aggregator, type FeedsCategory } from '@/types';
 import { onMounted, ref, watch } from 'vue';
 import { useWalletStore } from '@/stores/wallet';
-import { getSubscription } from '@/scripts/aeternity';
 import { useToast } from 'vue-toast-notification';
 import 'vue-toast-notification/dist/theme-sugar.css';
 import BigNumber from 'bignumber.js';
@@ -18,6 +17,7 @@ import InfoIcon from '@/components/icons/InfoIcon.vue';
 import TicketIcon from '@/components/icons/TicketIcon.vue';
 import ProgressBox from '@/components/ProgressBox.vue';
 import ToolTip from '@/components/ToolTip.vue';
+import TimeDown from '@/components/TimeDown.vue';
 
 const total = ref(1);
 const currentPage = ref(1);
@@ -28,7 +28,6 @@ const toast = useToast({ duration: 4000, position: 'top', dismissible: true });
 const category = ref<FeedsCategory | null>(null);
 const type = ref(FeedsType.Push);
 const walletStore = useWalletStore();
-const userStore = useUserStore();
 const fetchingAggregators = ref(false);
 
 const selectCategory = (newCategory: string) => {
@@ -39,6 +38,13 @@ const selectCategory = (newCategory: string) => {
   }
 
   getAggregator(1);
+};
+const getSymbol = (aggregator: Aggregator): string => {
+  if (aggregator.name.endsWith('USD')) return '$';
+  if (aggregator.name.endsWith('ETH')) return 'Ξ';
+  if (aggregator.name.endsWith('BTC')) return '₿';
+  if (aggregator.name.endsWith('EUR')) return '€';
+  return '';
 };
 
 const getAggregator = async (page: number) => {
@@ -59,9 +65,6 @@ const getAggregator = async (page: number) => {
   fetchingAggregators.value = false;
 };
 
-const fetchOwnerSubscription = async (owner: `ak_${string}`) => {
-  userStore.setSubscription(await getSubscription(owner));
-};
 
 const copyText = (text: string) => {
   navigator.clipboard.writeText(text);
@@ -70,16 +73,6 @@ const copyText = (text: string) => {
 
 onMounted(() => {
   getAggregator(currentPage.value);
-
-  if (walletStore.address) {
-    fetchOwnerSubscription(walletStore.address);
-  }
-});
-
-watch(walletStore, (store) => {
-  if (store.address) {
-    fetchOwnerSubscription(store.address);
-  }
 });
 </script>
 
@@ -97,98 +90,6 @@ watch(walletStore, (store) => {
             based</button>
           <button :class="type == FeedsType.Oracle ? 'type type_active' : 'type'"
             @click="type = FeedsType.Oracle">Oracle based</button>
-        </div>
-
-        <div class="table subscription" v-show="type == FeedsType.Oracle">
-          <div class="name">My subscription</div>
-          <div class="thead">
-            <div class="tr">
-              <div class="td">
-                <div>
-                  <p>ID</p>
-                  <ToolTip :tooltip-text="'Identifier.'">
-                    <InfoIcon />
-                  </ToolTip>
-                </div>
-              </div>
-              <div class="td">
-                <div>
-                  <p>Creator</p>
-                </div>
-              </div>
-              <div class="td">
-                <div>
-                  <p>Created at</p>
-                </div>
-              </div>
-              <div class="td">
-                <div>
-                  <p>Version</p>
-                  <ToolTip :tooltip-text="'Subscription contract version.'">
-                    <InfoIcon />
-                  </ToolTip>
-                </div>
-              </div>
-              <div class="td">
-                <div>
-                  <p>Consumers</p>
-                  <ToolTip :tooltip-text="'Number of added consumer contracts.'">
-                    <InfoIcon />
-                  </ToolTip>
-                </div>
-              </div>
-              <div class="td">
-                <div>
-                  <p>Balance</p>
-                </div>
-              </div>
-            </div>
-          </div>
-          <div class="tbody" v-if="userStore.subscription">
-            <div class="tr">
-              <div class="td">
-                <RouterLink :to="`/subscription`">
-                  <div>
-                    <TicketIcon />
-                    <p>{{ userStore.subscription.id }}</p>
-                  </div>
-                </RouterLink>
-              </div>
-              <div class="td">
-                <div>
-                  <p>{{ Converter.toChecksumAddress(userStore.subscription.creator, 4) }}</p>
-                  <CopyIcon />
-                </div>
-              </div>
-              <div class="td">
-                <div>
-                  <p>{{ Converter.fullMonth(new Date(Number(userStore.subscription.timestamp))) }}
-                  </p>
-                </div>
-              </div>
-              <div class="td">
-                <div>
-                  <p>{{ Number(userStore.subscription.version).toFixed(1) }}</p>
-                </div>
-              </div>
-              <div class="td">
-                <div>
-                  <p>{{ userStore.subscription.consumers.length }}</p>
-                </div>
-              </div>
-              <div class="td">
-                <div>
-                  <p>{{ Converter.toMoney(
-                    Converter.down(new BigNumber(userStore.subscription.balance), 18)
-                  ) }} Æ</p>
-                </div>
-              </div>
-            </div>
-          </div>
-          <div class="empty" v-else>
-            <img src="/images/empty.png" alt="Empty data">
-            <p>No subscription</p>
-          </div>
         </div>
 
         <div class="filters">
@@ -275,17 +176,16 @@ watch(walletStore, (store) => {
               </div>
               <div class="td">
                 <div>
-                  <p>{{ Converter.convertSecondsToMMSS(aggregator.pulse) }}</p>
+                  <p>
+                    <TimeDown :last-updated-at="aggregator.updatedAt" :interval="aggregator.pulse"
+                      :show-hours="false" />
+                  </p>
                 </div>
               </div>
               <div class="td">
                 <div>
                   <p>
-                    {{ aggregator.name.endsWith('USD') ? '$' : '' }}
-                    {{ aggregator.name.endsWith('ETH') ? 'Ξ' : '' }}
-                    {{ aggregator.name.endsWith('BTC') ? '₿' : '' }}
-                    {{ aggregator.name.endsWith('EUR') ? '€' : '' }}
-                    {{
+                    {{ getSymbol(aggregator) +
                       Converter.toMoney(
                         Converter.down(
                           Converter.getAverage(aggregator.latestDataFeed.answers.map(answer => new BigNumber(answer))),
@@ -303,7 +203,10 @@ watch(walletStore, (store) => {
               </div>
               <div class="td">
                 <div>
-                  <p>{{ Converter.convertSecondsToHHMMSS(aggregator.heartbeat) }}</p>
+                  <p>
+                    <TimeDown :last-updated-at="aggregator.updatedAt" :interval="aggregator.heartbeat"
+                      :show-hours="true" />
+                  </p>
                 </div>
               </div>
               <div class="td">
@@ -454,10 +357,6 @@ section {
   height: 50px;
 }
 
-.subscription .tr {
-  grid-template-columns: 1fr 1.2fr 2fr 0.6fr 0.8fr 1.5fr;
-}
-
 .thead .td div {
   display: flex;
   align-items: center;
@@ -550,13 +449,22 @@ a p {
 
   .tr {
     display: grid;
-    grid-template-columns: 0.8fr 0.6fr 1fr 1fr 0.8fr 0.6fr 0.3fr;
+    grid-template-columns: 0.8fr 0.6fr 0.8fr 1fr 0.8fr 0.6fr 0.3fr;
     align-items: center;
     height: 50px;
   }
 
-  .subscription .tr {
-    grid-template-columns: 1fr 1.2fr 2fr 0.6fr 0.8fr 1.5fr;
+  .tbody .tr {
+    height: 70px;
+    border-radius: 0px;
+    margin-bottom: 0px;
+    border-width: 0px;
+    border-bottom-width: 1px;
+  }
+
+  .tbody,
+  .thead {
+    min-width: 1000px;
   }
 
   .hero h3 {

@@ -11,6 +11,7 @@ import { format as formatDate } from 'timeago.js';
 import CopyIcon from '@/components/icons/CopyIcon.vue';
 import ProgressBox from '@/components/ProgressBox.vue';
 import ToolTip from '@/components/ToolTip.vue';
+import TimeDown from '@/components/TimeDown.vue';
 
 interface ChartData {
     name: string;
@@ -145,14 +146,20 @@ watch(interval, () => {
 
                             <div class="parameter">
                                 <p>Heartbeat</p>
-                                <h3>{{ Converter.convertSecondsToHHMMSS(aggregator.heartbeat) }} HH:MM:SS</h3>
+                                <h3>
+                                    <TimeDown :last-updated-at="aggregator.updatedAt" :interval="aggregator.heartbeat"
+                                        :show-hours="true" />
+                                </h3>
                             </div>
                         </div>
 
                         <div class="parameter_grid">
                             <div class="parameter">
                                 <p>Pulse</p>
-                                <h3>{{ Converter.convertSecondsToMMSS(aggregator.pulse) }} MM:SS</h3>
+                                <h3>
+                                    <TimeDown :last-updated-at="aggregator.updatedAt" :interval="aggregator.pulse"
+                                        :show-hours="false" />
+                                </h3>
                             </div>
 
                             <div class="parameter">
