@@ -65,7 +65,7 @@ const onDrawer = () => {
                                 Functions
                             </button>
                         </RouterLink>
-                        <a href="https://docs.feaeder.xyx" target="_blank">
+                        <a href="https://docs.feaeder.xyz" target="_blank">
                             <button class="tab">
                                 <p>Documentation</p>
                                 <OutIcon />
