@@ -117,8 +117,8 @@ defmodule Websocket.Main do
 
   # Send request to aggregator consumer
   defp send_request_to_aggregator_consumer(log_data) do
-    # Access necessary parameters from log_data
-    %{"address" => address, "queryId" => queryId, "question" => question} = log_data
+    # Skip the first element and extract address, queryId, and question
+    [_first | [address, queryId, question]] = log_data
 
     body = Jason.encode!(%{address: address, queryId: queryId, question: question})
 
@@ -134,8 +134,8 @@ defmodule Websocket.Main do
 
   # Send request to vrf consumer
   defp send_request_to_vrf_consumer(log_data) do
-    # Access necessary parameters from log_data
-    %{"requestId" => requestId, "to" => to} = log_data
+    # Skip the first element and extract requestId and to
+    [_first | [requestId, to]] = log_data
 
     body = Jason.encode!(%{requestId: requestId, to: to})
 
