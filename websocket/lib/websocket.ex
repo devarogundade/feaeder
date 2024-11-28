@@ -4,6 +4,8 @@ defmodule Websocket.Main do
   @vrfs Application.compile_env(:websocket, :vrfs)
   @aggregators Application.compile_env(:websocket, :aggregators)
   @consumer_url Application.compile_env(:websocket, :consumer_url)
+  @aggregator_topic Application.compile_env(:websocket, :aggregator_topic)
+  @vrf_topic Application.compile_env(:websocket, :vrf_topic)
 
   # Start the WebSocket connection
   def start_link(ws_url) do
@@ -38,10 +40,6 @@ defmodule Websocket.Main do
   # Handle WebSocket connection success
   def handle_connect(_conn, state) do
     IO.puts("WebSocket Client Connected")
-
-    # @aggregators
-    # |> Enum.each(&send_subscription_request/1)
-
     {:ok, state}
   end
 
@@ -93,11 +91,18 @@ defmodule Websocket.Main do
           case Jason.decode(body) do
             {:ok, %{"call_info" => %{"log" => log}}} ->
               case log do
-                [%{"topics" => [_ | [current_query_index]]} | _] ->
-                  process_query_index(current_query_index, state)
+                [%{"topics" => [topic | _], "data" => data}] ->
+                  cond do
+                    topic == @aggregator_topic ->
+                      send_request_to_aggregator_consumer(data)
+                    topic == @vrf_topic ->
+                      send_request_to_vrf_consumer(data)
+                    true ->
+                      :ok
+                  end
 
                 _ ->
-                  :ok
+                  IO.puts("No valid log found")
               end
 
             _ ->
@@ -110,20 +115,37 @@ defmodule Websocket.Main do
     end)
   end
 
-  # Process the query index if it hasn't been processed before
-  defp process_query_index(current_query_index, state) do
-    processed_index = Map.get(state, :processed_index, nil)
+  # Send request to aggregator consumer
+  defp send_request_to_aggregator_consumer(log_data) do
+    # Access necessary parameters from log_data
+    %{"address" => address, "queryId" => queryId, "question" => question} = log_data
 
-    if processed_index != current_query_index do
-      fulfill_query(current_query_index)
-      {:noreply, Map.put(state, :processed_index, current_query_index)}
-    else
-      {:noreply, state}
+    body = Jason.encode!(%{address: address, queryId: queryId, question: question})
+
+    # Send the POST request to the aggregator consumer
+    case HTTPoison.post("#{@consumer_url}/aggregators/request", body, [{"Content-Type", "application/json"}]) do
+      {:ok, %HTTPoison.Response{status_code: 200}} ->
+        IO.puts("Aggregator request sent successfully.")
+
+      {:error, reason} ->
+        IO.puts("Error sending aggregator request: #{inspect(reason)}")
     end
   end
 
-  # Simulated query fulfillment logic
-  defp fulfill_query(current_query_index) do
-    IO.puts("Fulfilling query index: #{current_query_index}")
+  # Send request to vrf consumer
+  defp send_request_to_vrf_consumer(log_data) do
+    # Access necessary parameters from log_data
+    %{"requestId" => requestId, "to" => to} = log_data
+
+    body = Jason.encode!(%{requestId: requestId, to: to})
+
+    # Send the POST request to the VRF consumer
+    case HTTPoison.post("#{@consumer_url}/vrf/request", body, [{"Content-Type", "application/json"}]) do
+      {:ok, %HTTPoison.Response{status_code: 200}} ->
+        IO.puts("VRF request sent successfully.")
+
+      {:error, reason} ->
+        IO.puts("Error sending VRF request: #{inspect(reason)}")
+    end
   end
 end
