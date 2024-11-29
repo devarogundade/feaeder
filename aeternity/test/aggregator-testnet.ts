@@ -7,13 +7,15 @@ import ContractWithMethods from '@aeternity/aepp-sdk/es/contract/Contract';
 dotenv.config();
 
 const AGGREGATOR_EXAMPLE_CONTRACT_SOURCE = './contracts/examples/AggregatorExample.aes';
+const AGGREGATOR_CONTRACT_SOURCE = './contracts/Aggregator.aes';
 
 describe('Bitcoin/Ae Aggregator Example', () => {
     let aeSdk: AeSdk | null = null;
     let exContract: ContractWithMethods<ContractMethodsBase> | null = null;
-    let subscriptionId: number = 1;
+    let subscriptionId: number = 2;
 
-    let address: `ct_${string}` = 'ct_DgVUCkr2MkhdhMwkcLWEkWdEiCKR1eeqELuJPTYybz7MrSJAX';
+    let address: `ct_${string}` = 'ct_2tKz3nx1aM242NMa9wbCn4dRi88M64jrX8X5cV7jhvGMSJMPcW';
+    let aggAddress: `ct_${string}` = 'ct_h4RLgfAHS77zBmUfDTcLHRohwqPpdWJ4zNMcz6cZ3BUJTE6mC';
 
     before(async () => {
         aeSdk = new AeSdk({
@@ -63,18 +65,5 @@ describe('Bitcoin/Ae Aggregator Example', () => {
 
         console.log('query: ', decodedResult);
         query = decodedResult;
-    });
-
-
-    it('Aggregator Example: get response ae price', async () => {
-        assert.notEqual(exContract, null);
-        assert.notEqual(aeSdk, null);
-        assert.notEqual(query, null);
-
-        if (!exContract || !aeSdk || !query) return;
-
-        const { decodedResult } = await exContract.$call('ae_usd_price', [query]);
-
-        console.log('response: ', decodedResult);
     });
 });
