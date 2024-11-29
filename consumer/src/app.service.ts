@@ -61,7 +61,8 @@ export class AppService {
     // Define job options to set a repeating job interval for the aggregator
     const jobOptions: JobsOptions = {
       repeat: {
-        every: aggregator.pulse
+        every: aggregator.pulse,
+        immediately: true
       },
       jobId: aggregator.address // Unique job ID to avoid duplicate jobs
     };
@@ -226,7 +227,8 @@ export class AppService {
     aggregators.forEach(aggregator => {
       const jobOptions: JobsOptions = {
         repeat: {
-          every: aggregator.pulse
+          every: aggregator.pulse,
+          immediately: true
         },
         jobId: aggregator.address // Unique job ID to prevent duplicates
       };

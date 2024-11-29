@@ -48,6 +48,7 @@ payable contract Aggregator =
         RoundDataAdded(int, int)    // Fired when a round of data is added
         | RoundDataUpdated(int, int)// Fired when a round of data is updated
         | RoundDataRemoved(int)     // Fired when a round of data is removed
+        | QueryCreated(int)
 
     // ============== INIT FUNCTION ============== //
 
@@ -109,11 +110,15 @@ payable contract Aggregator =
                                 , RelativeTTL(qttl)
                                 , RelativeTTL(rttl) )
 
-        put(state{ last_queries_idx = state.last_queries_idx + 1 
+        let queries_idx = state.last_queries_idx + 1
+
+        put(state{ last_queries_idx = queries_idx 
                  })
 
-        put(state{ queries[state.last_queries_idx] = query 
+        put(state{ queries[queries_idx] = query 
                  })
+
+        Chain.event(QueryCreated(queries_idx))
 
         query
 

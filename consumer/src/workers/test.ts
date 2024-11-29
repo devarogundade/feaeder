@@ -13,7 +13,7 @@ import axios from 'axios';
 @Injectable()
 export class OracleService implements OnModuleInit {
     private readonly WebSocketClient = new WebSocketClient.client();
-    private address: `ct_${string}` = `ct_2hyocLTtFSicJnPxDCGWQi8pDNLeD5gTAWAPudz962d9UTh4N5`;
+    private address: `ct_${string}` = `ct_h4RLgfAHS77zBmUfDTcLHRohwqPpdWJ4zNMcz6cZ3BUJTE6mC`;
 
     constructor(
         @InjectQueue('ConsumerRequestWorker') private aggregatorRequestQueue: Queue,
@@ -70,6 +70,8 @@ export class OracleService implements OnModuleInit {
             });
 
             connection.on('message', (message) => {
+                console.log(message);
+
                 if (message.type === 'utf8') {
                     let dataToDecode = null;
                     if (message.utf8Data !== "connected") {

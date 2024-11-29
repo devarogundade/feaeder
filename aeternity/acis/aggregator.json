@@ -73,6 +73,11 @@
             "RoundDataRemoved": [
               "int"
             ]
+          },
+          {
+            "QueryCreated": [
+              "int"
+            ]
           }
         ]
       },

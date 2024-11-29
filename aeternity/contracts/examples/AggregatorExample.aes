@@ -4,28 +4,28 @@ include "../interfaces/IAggregator.aes"
 
 contract AggregatorExample =    
     record state = {
-        btc_usdt_agg: IAggregator,
-        ae_usdt_agg: IAggregator
+        btc_usd_agg: IAggregator,
+        ae_usd_agg: IAggregator
         }
 
-    stateful entrypoint init( btc_usdt_agg: IAggregator
-                            , ae_usdt_agg: IAggregator ) = 
-        { btc_usdt_agg = btc_usdt_agg
-            , ae_usdt_agg = ae_usdt_agg }
+    stateful entrypoint init( btc_usd_agg: IAggregator
+                            , ae_usd_agg: IAggregator ) = 
+        { btc_usd_agg = btc_usd_agg
+            , ae_usd_agg = ae_usd_agg }
 
     entrypoint get_btc_slash_ae_price(amount: int): int =
-        let btc_data = state.btc_usdt_agg.latest_round_data()
-        let ae_data = state.ae_usdt_agg.latest_round_data()
+        let btc_data = state.btc_usd_agg.latest_round_data()
+        let ae_data = state.ae_usd_agg.latest_round_data()
 
         (btc_data.answer * amount) / ae_data.answer
 
     payable stateful entrypoint ask_ae_price( subscription_id: int
                                                         , question: string ): oracle_query(string, string) =
-        state.ae_usdt_agg.create_query( subscription_id
+        state.ae_usd_agg.create_query( subscription_id
                                       , question
                                       , 10
                                       , 10
                                       , protected = false )
 
-    entrypoint ae_usd_all_time_high(query: oracle_query(string, string)): option(string) =
-        state.ae_usdt_agg.get_oracle_answer(query)
+    entrypoint ae_usd_price(query: oracle_query(string, string)): option(string) =
+        state.ae_usd_agg.get_oracle_answer(query)

@@ -6,7 +6,8 @@
     "deploy": "npx ts-node ./deploy/index.ts",
     "test_vrf": "npx ts-node ./test/vrf.ts",
     "test_feaeder": "npx ts-node ./test/feaeder.ts",
-    "test_aggregator": "npx ts-node ./test/aggregator.ts"
+    "test_aggregator": "npx ts-node ./test/aggregator.ts",
+    "test_aggregator_testnet": "npx ts-node ./test/aggregator-testnet.ts"
   },
   "dependencies": {
     "@aeternity/aepp-sdk": "^14.0.0",

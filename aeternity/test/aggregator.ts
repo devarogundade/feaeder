@@ -233,7 +233,7 @@ describe('Bitcoin/Ae Aggregator Example', () => {
 
         if (!btcAggContract || !aeAggContract || !exContract || !aeSdk || !query) return;
 
-        const { decodedResult } = await exContract.$call('ae_usd_all_time_high', [query]);
+        const { decodedResult } = await exContract.$call('ae_usd_price', [query]);
         assert.notEqual(decodedResult, undefined);
 
         console.log('response: ', decodedResult);
