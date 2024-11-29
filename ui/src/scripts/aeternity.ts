@@ -5,11 +5,11 @@ import type { Subscription, VRF } from "@/types";
 import BigNumber from "bignumber.js";
 
 let aeSdk: AeSdk | null = null;
-const feaederId: `ct_${string}` = `ct_2naS9dLNZdTnc1m8fsKcSoDo8AFTeFDEfD6ndbk9uA1MKCpKuV`;
+const feaederId: `ct_${string}` = `ct_9UpqjPR7CgdoFQy1D8u66ZJ8LMybnNtGSjRvVADe1xiyqc8Ny`;
 
 export const vrfs: VRF[] = [{
     name: 'Random Words',
-    address: `ct_urTR8F2C37uGJq82m74nyRmQCgqBo8BuAu9MZYqoza4ta2FQn`,
+    address: `ct_RmuEGbEQbYXzvrE9FtZhRBGtjvoaJTqQCQETzbut9Jfa2tq3z`,
     version: 1,
     queryFee: '0.001'
 }];

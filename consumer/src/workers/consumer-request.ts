@@ -31,7 +31,7 @@ export class ConsumerRequestWorker extends WorkerHost {
         // If aggregator not found, mark the job as completed
         if (!aggregator) return job.moveToCompleted('', '');
 
-        if (question.type == AggregatorQuestionType.PRICE) {
+        if (question == AggregatorQuestionType.PRICE) {
             // Fetch the answers from the external data sources
             const fetchedAnswer = await this.fetchAnswers(aggregator);
 
@@ -72,7 +72,11 @@ export class ConsumerRequestWorker extends WorkerHost {
             aci
         });
 
-        await contract.$call('respond', [queryId, fetchedAnswer.answers]);
+        const answers: bigint[] = fetchedAnswer.answers.map(answer =>
+            BigInt(answer.toFixed(0))
+        );
+
+        await contract.$call('respond', [queryId, answers]);
     }
 
     // This event handler is triggered when the worker job completes

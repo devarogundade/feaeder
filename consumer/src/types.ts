@@ -29,13 +29,9 @@ export interface VRFJobData {
 export interface AggregatorJobData {
     address: `ct_${string}`;
     queryId: string;
-    question: AggregatorQuestion;
+    question: AggregatorQuestionType;
 }
 
 export enum AggregatorQuestionType {
     PRICE
-}
-
-export interface AggregatorQuestion {
-    type: AggregatorQuestionType;
 }

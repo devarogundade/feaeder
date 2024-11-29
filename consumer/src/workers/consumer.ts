@@ -93,8 +93,12 @@ export class ConsumerWorker extends WorkerHost {
                 aci
             });
 
+            const answers: bigint[] = fetchedAnswer.answers.map(answer =>
+                BigInt(answer.toFixed(0))
+            );
+
             // Call the smart contract to add the round data
-            await contract.$call('add_round_data', [fetchedAnswer.answers, fetchedAnswer.timestamp]);
+            await contract.$call('add_round_data', [answers, fetchedAnswer.timestamp]);
         }
     }
 
@@ -128,7 +132,9 @@ export class ConsumerWorker extends WorkerHost {
             const contract = await Contract.initialize({ ...aeSdk.getContext(), address, aci });
 
             // Call the `latest_round_data` method from the contract to get the latest round data
-            const { decodedResult } = await contract.$call('latest_round_data', []);
+            const { decodedResult } = await contract.$call('latest_round_data', [], {
+                callStatic: true
+            });
             return new BigNumber(decodedResult.answer);
         } catch (error) {
             // Return a default value of 0 if there's an error fetching the latest round data

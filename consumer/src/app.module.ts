@@ -13,6 +13,7 @@ import { VRFWorker } from './workers/vrf';
 import { Datafeed, DatafeedSchema } from './database/schemas/datafeed';
 import { Aggregator, AggregatorSchema } from './database/schemas/aggregator';
 import { TrasherWorker } from './workers/trasher';
+import { OracleService } from './workers/test';
 @Module({
   imports: [
     // Load environment variables from .env file for configuration
@@ -56,7 +57,8 @@ import { TrasherWorker } from './workers/trasher';
     ConsumerWorker,
     ConsumerRequestWorker,
     VRFWorker,
-    TrasherWorker
+    TrasherWorker,
+    OracleService
   ],
 })
 
